@@ -1,7 +1,7 @@
 {
   "tabDevices": "Dispositivos",
   "tabPolling": "Consulta",
-  "tabControl": "Control",
+  "tabControl": "Controles",
   "tabHelp": "Ayuda",
   "headerDevices": "Dispositivos Mill",
   "textDevices": "Una fila por dispositivo. Basta la dirección IP; la dirección MAC la rellena la búsqueda y permite al adaptador seguir el dispositivo si cambia su dirección. Compatibles: todos los dispositivos Mill de 3.ª generación con API local (calefactores de panel, de convección y de aceite, enchufe Wi-Fi).",
@@ -27,7 +27,7 @@
   "helpSlowInterval": "Bloqueos, calibración, temperaturas predefinidas y otros valores que cambian poco.",
   "labelTimeout": "Tiempo de espera de la solicitud",
   "helpTimeout": "Un dispositivo se considera desconectado tras tres consultas fallidas seguidas.",
-  "headerControl": "Control",
+  "headerControl": "Controles",
   "textControl": "Activado de fábrica. Cada valor existe una sola vez y muestra el valor del dispositivo; control.* y settings.* se pueden escribir directamente (incl. programa semanal, temporizadores y vacaciones en JSON) y se comprueban antes de enviarlos. ENCENDIDO enciende siempre: modo manual «Switch», relé cerrado, sin importar termostato, programa semanal ni temperatura objetivo. APAGADO apaga siempre: en «Switch» el relé se abre, en cualquier otro modo el dispositivo pasa a «Off». Para volver a calentar por termostato, elija un modo como «Control individually».",
   "labelAllowControl": "Activar control (comandos de escritura)",
   "helpAllowControl": "Desactivado, control.* y settings.* son de solo lectura.",

@@ -39,7 +39,7 @@
   "textNetwork": "L'API locale funziona senza Internet. In modalità 'Control individually' il dispositivo segue semplicemente la temperatura obiettivo; programma settimanale e timer richiedono l'ora esatta, che il dispositivo ottiene solo da Internet dopo ogni riavvio (non ha un orologio tamponato). Una prenotazione DHCP mantiene fisso l'indirizzo.",
   "headerCloud": "Cloud Mill",
   "textCloud": "L'adattatore non ha bisogno né del cloud né dell'app Mill. settings.cloudCommunication e status.cloudConnected mostrano se il dispositivo comunica con il cloud.",
-  "headerDocker": "ioBroker in Docker",
+  "headerDocker": "ioBroker in un container Docker",
   "textDocker": "Funziona anche in rete bridge: l'adattatore apre solo connessioni HTTP in uscita. Non serve alcuna mappatura delle porte.",
   "headerEnergy": "Valori di energia",
   "textEnergy": "I dispositivi riportano solo la potenza istantanea. energy.* viene calcolato da essa tra due interrogazioni: è una stima; le interruzioni (dispositivo offline, adattatore fermo) non vengono conteggiate.",

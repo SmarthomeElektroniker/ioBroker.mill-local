@@ -39,7 +39,7 @@
   "textNetwork": "De lokale API werkt zonder internet. In de modus 'Control individually' volgt het apparaat gewoon zijn doeltemperatuur; weekprogramma en timers hebben de juiste tijd nodig, die het apparaat na elke herstart alleen van internet krijgt (het heeft geen gebufferde klok). Een DHCP-reservering houdt het adres vast.",
   "headerCloud": "Mill-cloud",
   "textCloud": "De adapter heeft de Mill-cloud en -app niet nodig. Of het apparaat met de cloud praat, tonen settings.cloudCommunication en status.cloudConnected.",
-  "headerDocker": "ioBroker in Docker",
+  "headerDocker": "ioBroker in een Docker-container",
   "textDocker": "Werkt ook in een bridge-netwerk: de adapter maakt alleen uitgaande HTTP-verbindingen. Portmapping is niet nodig.",
   "headerEnergy": "Energiewaarden",
   "textEnergy": "De apparaten melden alleen het momentane vermogen. energy.* wordt daaruit tussen twee opvragingen berekend – een schatting; onderbrekingen (apparaat offline, adapter gestopt) tellen niet mee.",

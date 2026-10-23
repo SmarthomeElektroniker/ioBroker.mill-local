@@ -44,4 +44,17 @@ describe('model', () => {
         assert.ok(m.isMillStatus({ name: 'Mill HeaterGen3Socket', version: '0x230421', mac_address: '94:E6:86:00:12:34' }));
         assert.ok(!m.isMillStatus({ name: 'Shelly', version: '1', mac_address: '94:E6:86:00:12:34' }));
     });
+
+    it('validates configured intervals against the limits and the timer ceiling', () => {
+        assert.strictEqual(m.intervalMs(30, 30, 10, 3600), 30000);
+        assert.strictEqual(m.intervalMs('45', 30, 10, 3600), 45000);
+        // empty, invalid, zero or negative values fall back to the default
+        for (const bad of [undefined, null, '', 'x', 0, -5, NaN, Infinity]) {
+            assert.strictEqual(m.intervalMs(bad, 30, 10, 3600), 30000, String(bad));
+        }
+        assert.strictEqual(m.intervalMs(1, 30, 10, 3600), 10000);
+        assert.strictEqual(m.intervalMs(999999, 30, 10, 3600), 3600000);
+        // even a range beyond the timer limit never yields a longer delay
+        assert.strictEqual(m.intervalMs(1e12, 30, 10, 1e12), m.MAX_TIMER_MS);
+    });
 });

@@ -7,7 +7,7 @@
   "textDevices": "Eine Zeile je Gerät. Die IP-Adresse genügt; die MAC-Adresse trägt die Suche ein – damit findet der Adapter das Gerät auch nach einem Adresswechsel wieder. Unterstützt: alle Mill-Geräte der Generation 3 mit lokaler API (Panel-, Konvektions- und Ölheizungen, WLAN-Steckdose).",
   "labelDevices": "Geräte",
   "colEnabled": "Aktiv",
-  "colName": "Name (optional)",
+  "colName": "Bezeichnung (optional)",
   "colIp": "IP-Adresse",
   "colMac": "MAC-Adresse (aus der Suche)",
   "colApiKey": "API-Schlüssel",

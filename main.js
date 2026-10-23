@@ -102,9 +102,10 @@ class MillLocal extends utils.Adapter {
     async onReady() {
         await this.setState('info.connection', false, true);
         const cfg = this.config;
-        this.pollMs = Math.max(10, Number(cfg.pollInterval) || 30) * 1000;
-        this.slowEvery = Math.max(1, Math.round((Math.max(60, Number(cfg.slowInterval) || 600) * 1000) / this.pollMs));
-        this.timeoutMs = Math.min(30, Math.max(1, Number(cfg.timeout) || 5)) * 1000;
+        // same limits as the admin UI, enforced here as well (the instance object can be edited directly)
+        this.pollMs = model.intervalMs(cfg.pollInterval, 30, 10, 3600);
+        this.slowEvery = Math.max(1, Math.round(model.intervalMs(cfg.slowInterval, 600, 60, 86400) / this.pollMs));
+        this.timeoutMs = model.intervalMs(cfg.timeout, 5, 1, 30);
         this.allowControl = cfg.allowControl !== false;
 
         const rows = Array.isArray(cfg.devices) ? cfg.devices : [];
@@ -847,6 +848,7 @@ class MillLocal extends utils.Adapter {
                     d.timer = null;
                 }
             }
+            this.setState('info.connection', false, true).catch(() => {});
             callback();
         } catch {
             callback();

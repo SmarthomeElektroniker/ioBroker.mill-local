@@ -7,7 +7,7 @@
 
 *Read this in another language: [Deutsche Kurzbeschreibung](README_de.md).*
 
-Connect **Mill Generation 3** devices to ioBroker through their **local REST API** – no cloud,
+Connect **Mill Generation 3** devices ([Mill International AS](https://millnorway.com/)) to ioBroker through their **local REST API** – no cloud,
 no Mill account, no app. Works for every Generation 3 device with the local API:
 
 | Device kind | Detected by | Extra values |
@@ -37,7 +37,8 @@ solutions for them).
 - Read-only: room temperature (calibrated and raw), humidity (sockets), heating power, control signal,
   open window detected, cloud connection
 - Estimated energy (`energy.total/today/yesterday`, kWh) from the power readings
-- **Control is on by default**; switched off, `control.*` and `settings.*` become read-only
+- **Control is on by default**; switched off, `control.*` and `settings.*` become read-only (with read-only
+  roles) and `control.restart` is not created
 - Every value is validated (range, step, list of values) before anything is sent
 - Network search (the devices do not announce themselves via mDNS), automatic re-discovery by MAC address
   when a device changes its IP
@@ -140,6 +141,16 @@ account or the cloud.
 	### **WORK IN PROGRESS**
 -->
 
+### 0.2.2 (2026-10-23)
+
+- Roles: operation mode, display unit, predictive heating and controller type use the role `text`
+  (`level.mode` is not a valid role). With control disabled, the values get read-only roles and the restart
+  button is left out.
+- Configured intervals are also checked in the adapter (same limits as the admin UI, never above the timer
+  limit); `info.connection` is reset when the adapter stops.
+- Translations: remaining texts that were identical to English are translated; tab bar layout for small screens.
+- Manufacturer link in the README; versions before 0.2.0 moved to CHANGELOG_OLD.md.
+
 ### 0.2.1 (2026-10-23)
 
 -   Release via GitHub Actions with npm provenance (no functional changes).
@@ -148,41 +159,7 @@ account or the cloud.
 
 - First public release (functionally the same as 0.1.4): published on GitHub and npm, test data anonymised.
 
-### 0.1.4 (2026-10-23)
-
-- README: the device only asks for the time after a successful ping to `4.2.2.1`; fully local setup without
-  internet access verified (weekly program switches on time).
-
-### 0.1.3 (2026-10-18)
-
-- ON always switches on in the manual mode `Switch` (relay closed), OFF always switches off (`Switch`: relay
-  open, otherwise `Off`); `control.power` shows the relay. `status.heating` removed (same as `control.power`).
-- Weekly program, one-off timers and vacation readable and writable as JSON, with validation.
-- New option: the device's time zone follows the ioBroker host (needed for the timers).
-
-### 0.1.2 (2026-10-18)
-
-- No value is shown twice: the duplicates under `status` (operation mode, target temperature, lock, open window
-  enabled) and `settings.temperatureNormal` are gone; obsolete states are removed on start.
-- Everything the local API can change is writable: `settings.*` (calibration, locks, display unit, predictive
-  heating, cloud, hysteresis, preset temperatures, open window parameters, power level, socket mode, time zone,
-  controller type, commercial lock limits, PID), `info.customName` and `control.restart`; every value is
-  validated before sending. `status.switchedOn` and `settings.weeklyProgramActive` are gone (misleading / same
-  as the operation mode).
-- New operation mode `Switch`: plain switch without temperature control, on/off switches the relay directly.
-- Object names in all eleven languages.
-- Display unit Fahrenheit is sent in the spelling the device accepts.
-- Fix: a poll that was running while a command arrived could turn the state back to the old value.
-- `status.heating` follows the control signal (relay), also when nothing is plugged in.
-
-### 0.1.1 (2026-10-18)
-
-- Control is now enabled by default (a thermostat is meant to be controlled); it can still be switched off.
-
-### 0.1.0 (2026-10-18)
-
-- First version: all Mill Generation 3 devices with local API, several devices per instance, kind detection,
-  network search and re-discovery, control that can be switched off, estimated energy, API key support.
+Older entries (versions before the first public release) are in [CHANGELOG_OLD.md](CHANGELOG_OLD.md).
 
 ## Trademark
 

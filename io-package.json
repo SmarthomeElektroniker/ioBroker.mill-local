@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mill-local",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "news": {
+      "0.2.2": {
+        "en": "Valid roles for mode values and read-only roles while control is disabled; intervals checked in the adapter; remaining translations completed.",
+        "de": "Gültige Rollen für Moduswerte und Nur-Lese-Rollen bei abgeschalteter Steuerung; Intervalle im Adapter geprüft; restliche Übersetzungen ergänzt.",
+        "ru": "Допустимые роли для значений режимов и роли только для чтения при отключённом управлении; интервалы проверяются в адаптере; оставшиеся переводы дополнены.",
+        "pt": "Funções válidas para valores de modo e funções só de leitura com o controlo desativado; intervalos verificados no adaptador; traduções restantes concluídas.",
+        "nl": "Geldige rollen voor moduswaarden en alleen-lezen-rollen bij uitgeschakelde bediening; intervallen in de adapter gecontroleerd; resterende vertalingen aangevuld.",
+        "fr": "Rôles valides pour les valeurs de mode et rôles en lecture seule lorsque la commande est désactivée ; intervalles vérifiés dans l’adaptateur ; traductions restantes complétées.",
+        "it": "Ruoli validi per i valori di modalità e ruoli di sola lettura con il controllo disattivato; intervalli verificati nell’adattatore; traduzioni mancanti completate.",
+        "es": "Roles válidos para los valores de modo y roles de solo lectura con el control desactivado; intervalos comprobados en el adaptador; traducciones restantes completadas.",
+        "pl": "Prawidłowe role dla wartości trybów i role tylko do odczytu przy wyłączonym sterowaniu; interwały sprawdzane w adapterze; uzupełniono brakujące tłumaczenia.",
+        "uk": "Допустимі ролі для значень режимів і ролі лише для читання при вимкненому керуванні; інтервали перевіряються в адаптері; решту перекладів доповнено.",
+        "zh-cn": "模式值使用有效角色，禁用控制时使用只读角色；适配器内校验间隔；补全其余翻译。"
+      },
       "0.2.1": {
         "en": "Release via GitHub Actions with npm provenance (no functional changes).",
         "de": "Veröffentlichung über GitHub Actions mit npm-Herkunftsnachweis (keine funktionalen Änderungen).",
@@ -34,11 +47,11 @@
       "en": "Mill local",
       "de": "Mill lokal",
       "ru": "Mill локально",
-      "pt": "Mill local",
+      "pt": "Mill em modo local",
       "nl": "Mill lokaal",
-      "fr": "Mill local",
+      "fr": "Mill en local",
       "it": "Mill locale",
-      "es": "Mill local",
+      "es": "Mill en local",
       "pl": "Mill lokalnie",
       "uk": "Mill локально",
       "zh-cn": "Mill 本地"

@@ -4,13 +4,14 @@
 
 Die vollständige Dokumentation steht in der englischen [README](README.md).
 
-Der Adapter bindet Mill-Geräte der **Generation 3** (Panel-, Konvektions- und Ölheizungen sowie die
+Der Adapter bindet Mill-Geräte der **Generation 3** ([Mill International AS](https://millnorway.com/)) (Panel-, Konvektions- und Ölheizungen sowie die
 WLAN-Steckdose) über ihre **lokale API** ein – ohne Cloud, Konto oder App. Mehrere Geräte je Instanz,
 Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adresswechsel über die MAC-Adresse.
 
 - **Jeden Wert gibt es nur einmal.** `control.*` (Solltemperatur, Betriebsart, Ein/Aus) und `settings.*` (alle
   Einstellungen, die die API ändern kann) zeigen den Gerätewert und sind direkt beschreibbar.
-- **Steuerung ist ab Werk ein**; ausgeschaltet sind `control.*` und `settings.*` nur lesbar.
+- **Steuerung ist ab Werk ein**; ausgeschaltet sind `control.*` und `settings.*` nur lesbar (mit Nur-Lese-Rollen),
+  `control.restart` entfällt.
 - **EIN schaltet immer ein** – manueller Modus `Switch`, Relais an, unabhängig von Thermostat, Wochenprogramm
   und Sollwert. **AUS schaltet immer aus** (in `Switch` öffnet das Relais, sonst Betriebsart `Off`). Für Heizen
   nach Thermostat eine Betriebsart wie `Control individually` wählen.
