@@ -1,0 +1,59 @@
+{
+  "name": "iobroker.mill-local",
+  "version": "0.2.0",
+  "description": "Mill Generation 3 heaters and sockets via their local API - no cloud.",
+  "author": {
+    "name": "Immanuel",
+    "email": "github@freitag.online"
+  },
+  "homepage": "https://github.com/SmarthomeElektroniker/ioBroker.mill-local",
+  "license": "MIT",
+  "keywords": [
+    "ioBroker",
+    "mill",
+    "millheat",
+    "heater",
+    "heating",
+    "local"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SmarthomeElektroniker/ioBroker.mill-local.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SmarthomeElektroniker/ioBroker.mill-local/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.4.3"
+  },
+  "devDependencies": {
+    "@alcalzone/release-script": "^5.2.1",
+    "@alcalzone/release-script-plugin-iobroker": "^5.2.0",
+    "@alcalzone/release-script-plugin-license": "^5.2.2",
+    "@alcalzone/release-script-plugin-manual-review": "^5.2.0",
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/eslint-config": "^2.3.4",
+    "@iobroker/testing": "^6.3.1",
+    "@tsconfig/node22": "^22.0.6",
+    "@types/node": "^22.18.11"
+  },
+  "main": "main.js",
+  "files": [
+    "LICENSE",
+    "admin/",
+    "io-package.json",
+    "lib/",
+    "main.js"
+  ],
+  "scripts": {
+    "test:package": "mocha test/package --exit",
+    "test:integration": "mocha test/integration --exit",
+    "test:unit": "mocha test/unit --exit",
+    "test": "npm run test:package && npm run test:unit",
+    "lint": "eslint .",
+    "release": "release-script"
+  }
+}

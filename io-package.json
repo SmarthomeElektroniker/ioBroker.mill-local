@@ -1,0 +1,218 @@
+{
+  "common": {
+    "name": "mill-local",
+    "version": "0.2.0",
+    "news": {
+      "0.2.0": {
+        "en": "First public release (functionally the same as 0.1.4): published on GitHub and npm, test data anonymised.",
+        "de": "Erste öffentliche Version (funktional gleich 0.1.4): auf GitHub und npm veröffentlicht, Testdaten anonymisiert.",
+        "ru": "Первый публичный выпуск (функционально совпадает с 0.1.4): опубликован на GitHub и npm, тестовые данные обезличены.",
+        "pt": "Primeira versão pública (funcionalmente igual à 0.1.4): publicada no GitHub e no npm, dados de teste anonimizados.",
+        "nl": "Eerste openbare versie (functioneel gelijk aan 0.1.4): gepubliceerd op GitHub en npm, testgegevens geanonimiseerd.",
+        "fr": "Première version publique (fonctionnellement identique à 0.1.4) : publiée sur GitHub et npm, données de test anonymisées.",
+        "it": "Prima versione pubblica (funzionalmente uguale alla 0.1.4): pubblicata su GitHub e npm, dati di test anonimizzati.",
+        "es": "Primera versión pública (funcionalmente igual a la 0.1.4): publicada en GitHub y npm, datos de prueba anonimizados.",
+        "pl": "Pierwsza publiczna wersja (funkcjonalnie taka sama jak 0.1.4): opublikowana na GitHub i npm, dane testowe zanonimizowane.",
+        "uk": "Перший публічний випуск (функціонально такий самий, як 0.1.4): опубліковано на GitHub і npm, тестові дані знеособлено.",
+        "zh-cn": "首个公开版本（功能与 0.1.4 相同）：已发布到 GitHub 和 npm，测试数据已匿名化。"
+      },
+      "0.1.4": {
+        "en": "Documentation: the device only fetches the time after a successful ping to 4.2.2.1; fully local setup without internet verified",
+        "de": "Dokumentation: Das Gerät holt die Uhrzeit nur nach erfolgreichem Ping an 4.2.2.1; rein lokaler Betrieb ohne Internet nachgewiesen",
+        "ru": "Документация: устройство получает время только после успешного пинга 4.2.2.1; полностью локальная работа без интернета проверена",
+        "pt": "Documentação: o dispositivo só obtém a hora após um ping bem-sucedido para 4.2.2.1; funcionamento totalmente local sem internet verificado",
+        "nl": "Documentatie: het apparaat haalt de tijd pas op na een geslaagde ping naar 4.2.2.1; volledig lokaal gebruik zonder internet bevestigd",
+        "fr": "Documentation : l'appareil ne récupère l'heure qu'après un ping réussi vers 4.2.2.1 ; fonctionnement entièrement local sans internet vérifié",
+        "it": "Documentazione: il dispositivo recupera l'ora solo dopo un ping riuscito a 4.2.2.1; funzionamento completamente locale senza internet verificato",
+        "es": "Documentación: el dispositivo solo obtiene la hora tras un ping correcto a 4.2.2.1; funcionamiento totalmente local sin internet verificado",
+        "pl": "Dokumentacja: urządzenie pobiera czas dopiero po udanym pingu do 4.2.2.1; w pełni lokalna praca bez internetu potwierdzona",
+        "uk": "Документація: пристрій отримує час лише після успішного пінгу 4.2.2.1; повністю локальну роботу без інтернету перевірено",
+        "zh-cn": "文档：设备仅在成功 ping 4.2.2.1 后才获取时间；已验证无互联网的纯本地运行"
+      },
+      "0.1.3": {
+        "en": "ON always switches on in manual mode (relay closed), OFF always switches off; weekly program, one-off timers and vacation readable and writable as JSON; device time zone follows ioBroker (needed for the timers)",
+        "de": "EIN schaltet immer im manuellen Modus ein (Relais an), AUS immer aus; Wochenprogramm, Einzeltimer und Urlaub als JSON les- und schreibbar; Zeitzone des Geräts folgt ioBroker (nötig für die Timer)",
+        "ru": "ВКЛ всегда включает в ручном режиме (реле замкнуто), ВЫКЛ всегда выключает; недельная программа, разовые таймеры и отпуск читаются и записываются как JSON; часовой пояс устройства следует ioBroker (нужно для таймеров)",
+        "pt": "LIGAR liga sempre em modo manual (relé fechado), DESLIGAR desliga sempre; programa semanal, temporizadores únicos e férias legíveis e graváveis em JSON; fuso horário do dispositivo segue o ioBroker (necessário para os temporizadores)",
+        "nl": "AAN schakelt altijd in handmatige modus in (relais dicht), UIT altijd uit; weekprogramma, eenmalige timers en vakantie leesbaar en schrijfbaar als JSON; tijdzone van het apparaat volgt ioBroker (nodig voor de timers)",
+        "fr": "MARCHE allume toujours en mode manuel (relais fermé), ARRÊT éteint toujours ; programme hebdomadaire, minuteries ponctuelles et vacances lisibles et inscriptibles en JSON ; le fuseau horaire de l'appareil suit ioBroker (nécessaire pour les minuteries)",
+        "it": "ACCESO accende sempre in modalità manuale (relè chiuso), SPENTO spegne sempre; programma settimanale, timer singoli e vacanza leggibili e scrivibili in JSON; il fuso orario del dispositivo segue ioBroker (necessario per i timer)",
+        "es": "ENCENDIDO enciende siempre en modo manual (relé cerrado), APAGADO apaga siempre; programa semanal, temporizadores únicos y vacaciones legibles y escribibles en JSON; la zona horaria del dispositivo sigue a ioBroker (necesario para los temporizadores)",
+        "pl": "WŁ. zawsze włącza w trybie ręcznym (przekaźnik zwarty), WYŁ. zawsze wyłącza; program tygodniowy, timery jednorazowe i urlop do odczytu i zapisu jako JSON; strefa czasowa urządzenia podąża za ioBroker (potrzebne dla timerów)",
+        "uk": "УВІМК. завжди вмикає в ручному режимі (реле замкнене), ВИМК. завжди вимикає; тижнева програма, разові таймери й відпустка читаються та записуються як JSON; часовий пояс пристрою слідує за ioBroker (потрібно для таймерів)",
+        "zh-cn": "“开”总是以手动模式接通（继电器闭合），“关”总是断开；周程序、一次性定时器和假期可作为 JSON 读写；设备时区跟随 ioBroker（定时器需要）"
+      },
+      "0.1.2": {
+        "en": "No value is shown twice; everything the local API can change is writable (incl. time zone, controller type, commercial lock limits, PID, restart); new operation mode 'Switch' switches the relay without temperature control; running polls no longer turn commands back; names in all languages",
+        "de": "Kein Wert doppelt; alles, was die lokale API ändern kann, ist schreibbar (auch Zeitzone, Reglerart, Grenzen der Gewerbesperre, PID, Neustart); neue Betriebsart 'Switch' schaltet das Relais ohne Temperaturregelung; laufende Abfragen drehen Befehle nicht mehr zurück; Namen in allen Sprachen",
+        "ru": "Ни одно значение не дублируется; всё, что может изменить локальный API, доступно для записи (включая часовой пояс, тип регулятора, пределы коммерческой блокировки, ПИД, перезапуск); новый режим «Switch» переключает реле без регулирования температуры; текущий опрос больше не отменяет команды; имена на всех языках",
+        "pt": "Nenhum valor em duplicado; tudo o que a API local pode alterar é gravável (incl. fuso horário, tipo de regulador, limites do bloqueio comercial, PID, reinício); novo modo 'Switch' comuta o relé sem controlo de temperatura; consultas em curso já não revertem comandos; nomes em todos os idiomas",
+        "nl": "Geen waarde dubbel; alles wat de lokale API kan wijzigen is schrijfbaar (ook tijdzone, regelaartype, grenzen van het commerciële slot, PID, herstart); nieuwe modus 'Switch' schakelt het relais zonder temperatuurregeling; lopende opvragingen draaien opdrachten niet meer terug; namen in alle talen",
+        "fr": "Aucune valeur en double ; tout ce que l'API locale peut modifier est inscriptible (y compris fuseau horaire, type de régulateur, limites du verrouillage commercial, PID, redémarrage) ; nouveau mode « Switch » qui commute le relais sans régulation ; une interrogation en cours n'annule plus les commandes ; noms dans toutes les langues",
+        "it": "Nessun valore doppio; tutto ciò che l'API locale può modificare è scrivibile (incl. fuso orario, tipo di regolatore, limiti del blocco commerciale, PID, riavvio); nuova modalità 'Switch' che commuta il relè senza regolazione; un'interrogazione in corso non annulla più i comandi; nomi in tutte le lingue",
+        "es": "Ningún valor duplicado; todo lo que la API local puede cambiar es escribible (incl. zona horaria, tipo de regulador, límites del bloqueo comercial, PID, reinicio); nuevo modo «Switch» que conmuta el relé sin control de temperatura; una consulta en curso ya no revierte los comandos; nombres en todos los idiomas",
+        "pl": "Żadna wartość nie jest zdublowana; wszystko, co lokalne API może zmienić, jest zapisywalne (także strefa czasowa, typ regulatora, granice blokady komercyjnej, PID, restart); nowy tryb „Switch” przełącza przekaźnik bez regulacji temperatury; trwające odpytanie nie cofa już poleceń; nazwy we wszystkich językach",
+        "uk": "Жодне значення не дублюється; усе, що може змінити локальний API, доступне для запису (зокрема часовий пояс, тип регулятора, межі комерційного блокування, ПІД, перезапуск); новий режим «Switch» перемикає реле без регулювання температури; поточне опитування більше не скасовує команди; назви всіма мовами",
+        "zh-cn": "不再有重复值；本地 API 可更改的一切均可写（包括时区、控制器类型、商用锁温度范围、PID、重启）；新的“Switch”模式在没有温度调节的情况下切换继电器；正在进行的轮询不再撤销命令；名称支持所有语言"
+      },
+      "0.1.1": {
+        "en": "Control is now enabled by default (a thermostat is meant to be controlled); it can still be switched off",
+        "de": "Steuerung ist jetzt ab Werk eingeschaltet (ein Thermostat will man steuern); sie lässt sich weiterhin abschalten",
+        "ru": "Управление теперь включено по умолчанию (термостатом нужно управлять); его по-прежнему можно отключить",
+        "pt": "O controlo está agora ativado por omissão (um termóstato é para ser controlado); continua a poder ser desligado",
+        "nl": "Bediening staat nu standaard aan (een thermostaat wil je bedienen); ze kan nog steeds worden uitgeschakeld",
+        "fr": "La commande est désormais activée par défaut (un thermostat est fait pour être commandé) ; elle peut toujours être désactivée",
+        "it": "Il controllo è ora attivo per impostazione predefinita (un termostato va controllato); può comunque essere disattivato",
+        "es": "El control ahora está activado de forma predeterminada (un termostato está para controlarse); se puede seguir desactivando",
+        "pl": "Sterowanie jest teraz domyślnie włączone (termostatem chce się sterować); nadal można je wyłączyć",
+        "uk": "Керування тепер увімкнено за замовчуванням (термостатом треба керувати); його й надалі можна вимкнути",
+        "zh-cn": "控制功能现默认启用（恒温器本就是用来控制的）；仍可将其关闭"
+      },
+      "0.1.0": {
+        "en": "First version: Mill Generation 3 heaters and sockets via the local API, several devices, network search, control optional",
+        "de": "Erste Version: Mill-Geräte der Generation 3 (Heizungen und Steckdosen) über die lokale API, mehrere Geräte, Netzwerksuche, Steuerung optional",
+        "ru": "Первая версия: обогреватели и розетки Mill 3-го поколения через локальный API, несколько устройств, поиск в сети, управление по выбору",
+        "pt": "Primeira versão: aquecedores e tomadas Mill de 3.ª geração através da API local, vários dispositivos, pesquisa na rede, controlo opcional",
+        "nl": "Eerste versie: Mill-verwarmingen en -stopcontacten van generatie 3 via de lokale API, meerdere apparaten, netwerkzoekfunctie, bediening optioneel",
+        "fr": "Première version : radiateurs et prises Mill de 3e génération via l'API locale, plusieurs appareils, recherche réseau, commande facultative",
+        "it": "Prima versione: stufe e prese Mill di 3ª generazione tramite l'API locale, più dispositivi, ricerca in rete, controllo opzionale",
+        "es": "Primera versión: calefactores y enchufes Mill de 3.ª generación mediante la API local, varios dispositivos, búsqueda en la red, control opcional",
+        "pl": "Pierwsza wersja: grzejniki i gniazdka Mill 3. generacji przez lokalne API, wiele urządzeń, wyszukiwanie w sieci, sterowanie opcjonalne",
+        "uk": "Перша версія: обігрівачі та розетки Mill 3-го покоління через локальний API, кілька пристроїв, пошук у мережі, керування за бажанням",
+        "zh-cn": "首个版本：通过本地 API 接入 Mill 第三代取暖器和插座，支持多台设备、网络搜索，控制功能可选"
+      }
+    },
+    "titleLang": {
+      "en": "Mill local",
+      "de": "Mill lokal",
+      "ru": "Mill локально",
+      "pt": "Mill local",
+      "nl": "Mill lokaal",
+      "fr": "Mill local",
+      "it": "Mill locale",
+      "es": "Mill local",
+      "pl": "Mill lokalnie",
+      "uk": "Mill локально",
+      "zh-cn": "Mill 本地"
+    },
+    "desc": {
+      "en": "Mill Generation 3 heaters and sockets via their local API - no cloud",
+      "de": "Mill-Heizungen und -Steckdosen der Generation 3 über die lokale API – ohne Cloud",
+      "ru": "Обогреватели и розетки Mill 3-го поколения через локальный API – без облака",
+      "pt": "Aquecedores e tomadas Mill de 3.ª geração através da API local – sem nuvem",
+      "nl": "Mill-verwarmingen en -stopcontacten van generatie 3 via de lokale API – zonder cloud",
+      "fr": "Radiateurs et prises Mill de 3e génération via l'API locale – sans cloud",
+      "it": "Stufe e prese Mill di 3ª generazione tramite l'API locale – senza cloud",
+      "es": "Calefactores y enchufes Mill de 3.ª generación mediante la API local, sin nube",
+      "pl": "Grzejniki i gniazdka Mill 3. generacji przez lokalne API – bez chmury",
+      "uk": "Обігрівачі та розетки Mill 3-го покоління через локальний API – без хмари",
+      "zh-cn": "通过本地 API 接入 Mill 第三代取暖器和插座，无需云端"
+    },
+    "authors": [
+      "Immanuel <github@freitag.online>"
+    ],
+    "keywords": [
+      "mill",
+      "millheat",
+      "heater",
+      "heating",
+      "socket",
+      "local"
+    ],
+    "licenseInformation": {
+      "type": "free",
+      "license": "MIT"
+    },
+    "platform": "Javascript/Node.js",
+    "icon": "mill-local.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/SmarthomeElektroniker/ioBroker.mill-local/main/admin/mill-local.png",
+    "readme": "https://github.com/SmarthomeElektroniker/ioBroker.mill-local/blob/main/README.md",
+    "loglevel": "info",
+    "tier": 2,
+    "mode": "daemon",
+    "type": "climate-control",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "messagebox": true,
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.20"
+      }
+    ]
+  },
+  "native": {
+    "devices": [],
+    "pollInterval": 30,
+    "slowInterval": 600,
+    "timeout": 5,
+    "allowControl": true,
+    "rediscover": true,
+    "discoverNetworks": "",
+    "apiKey": "",
+    "syncTimezone": true
+  },
+  "encryptedNative": [
+    "apiKey"
+  ],
+  "protectedNative": [
+    "apiKey"
+  ],
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Informationen",
+          "ru": "Информация",
+          "pt": "Informação",
+          "nl": "Informatie",
+          "fr": "Informations",
+          "it": "Informazioni",
+          "es": "Información",
+          "pl": "Informacje",
+          "uk": "Інформація",
+          "zh-cn": "信息"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": {
+          "en": "All devices reachable",
+          "de": "Alle Geräte erreichbar",
+          "ru": "Все устройства доступны",
+          "pt": "Todos os dispositivos acessíveis",
+          "nl": "Alle apparaten bereikbaar",
+          "fr": "Tous les appareils joignables",
+          "it": "Tutti i dispositivi raggiungibili",
+          "es": "Todos los dispositivos accesibles",
+          "pl": "Wszystkie urządzenia osiągalne",
+          "uk": "Усі пристрої доступні",
+          "zh-cn": "所有设备均可访问"
+        },
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
+}

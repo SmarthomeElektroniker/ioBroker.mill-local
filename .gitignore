@@ -1,0 +1,18 @@
+node_modules/
+.idea/
+*.log
+.DS_Store
+tmp/
+coverage/
+.vscode/*
+# Die Schema-Zuordnungen gehoeren ins Repo - der Repo-Checker sucht sie dort (S4036).
+!.vscode/settings.json
+*.tgz
+
+.commitinfo
+
+# Interne Arbeitsordner (Sicherungen, Geraetedaten, Berichte, Werkzeuge) - nie veroeffentlichen
+lokal/
+docs/
+werkzeuge/
+__pycache__/

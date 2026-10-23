@@ -1,0 +1,357 @@
+{
+    "i18n": true,
+    "type": "tabs",
+    "items": {
+        "tabDevices": {
+            "type": "panel",
+            "label": "tabDevices",
+            "items": {
+                "hDevices": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerDevices",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tDevices": {
+                    "type": "staticText",
+                    "text": "textDevices",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "devices": {
+                    "type": "table",
+                    "label": "labelDevices",
+                    "newLine": true,
+                    "items": [
+                        {
+                            "type": "checkbox",
+                            "attr": "enabled",
+                            "title": "colEnabled",
+                            "width": "8%",
+                            "default": true
+                        },
+                        {
+                            "type": "text",
+                            "attr": "name",
+                            "title": "colName",
+                            "width": "27%"
+                        },
+                        {
+                            "type": "text",
+                            "attr": "ip",
+                            "title": "colIp",
+                            "width": "25%",
+                            "validator": "!data.ip || /^[A-Za-z0-9.:-]+$/.test(data.ip)",
+                            "validatorErrorText": "errIp",
+                            "validatorNoSaveOnError": true
+                        },
+                        {
+                            "type": "text",
+                            "attr": "mac",
+                            "title": "colMac",
+                            "width": "25%"
+                        },
+                        {
+                            "type": "checkbox",
+                            "attr": "useApiKey",
+                            "title": "colApiKey",
+                            "width": "15%",
+                            "default": false
+                        }
+                    ],
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "hDiscover": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerDiscover",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tDiscover": {
+                    "type": "staticText",
+                    "text": "textDiscover",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "discoverNetworks": {
+                    "type": "text",
+                    "label": "labelNetworks",
+                    "help": "helpNetworks",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "discover": {
+                    "type": "sendTo",
+                    "command": "discover",
+                    "label": "btnDiscover",
+                    "variant": "outlined",
+                    "useNative": true,
+                    "showProcess": true,
+                    "jsonData": "{\"networks\":\"${data.discoverNetworks}\"}",
+                    "help": "helpDiscover",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4,
+                    "timeout": 120000
+                },
+                "rediscover": {
+                    "type": "checkbox",
+                    "label": "labelRediscover",
+                    "help": "helpRediscover",
+                    "newLine": true,
+                    "default": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 8,
+                    "xl": 8
+                }
+            }
+        },
+        "tabPolling": {
+            "type": "panel",
+            "label": "tabPolling",
+            "items": {
+                "hPolling": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerPolling",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "pollInterval": {
+                    "type": "number",
+                    "label": "labelPollInterval",
+                    "help": "helpPollInterval",
+                    "min": 10,
+                    "max": 3600,
+                    "default": 30,
+                    "unit": "s",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "slowInterval": {
+                    "type": "number",
+                    "label": "labelSlowInterval",
+                    "help": "helpSlowInterval",
+                    "min": 60,
+                    "max": 86400,
+                    "default": 600,
+                    "unit": "s",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                },
+                "timeout": {
+                    "type": "number",
+                    "label": "labelTimeout",
+                    "help": "helpTimeout",
+                    "min": 1,
+                    "max": 30,
+                    "default": 5,
+                    "unit": "s",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "tabControl": {
+            "type": "panel",
+            "label": "tabControl",
+            "items": {
+                "hControl": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerControl",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tControl": {
+                    "type": "staticText",
+                    "text": "textControl",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "allowControl": {
+                    "type": "checkbox",
+                    "label": "labelAllowControl",
+                    "help": "helpAllowControl",
+                    "newLine": true,
+                    "default": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 8,
+                    "xl": 8
+                },
+                "syncTimezone": {
+                    "type": "checkbox",
+                    "label": "labelSyncTimezone",
+                    "help": "helpSyncTimezone",
+                    "newLine": true,
+                    "default": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 8,
+                    "xl": 8
+                },
+                "hApiKey": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerApiKey",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tApiKey": {
+                    "type": "staticText",
+                    "text": "textApiKey",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "apiKey": {
+                    "type": "password",
+                    "label": "labelApiKey",
+                    "help": "helpApiKey",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4
+                }
+            }
+        },
+        "tabHelp": {
+            "type": "panel",
+            "label": "tabHelp",
+            "items": {
+                "hNetwork": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerNetwork",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tNetwork": {
+                    "type": "staticText",
+                    "text": "textNetwork",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "hCloud": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerCloud",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tCloud": {
+                    "type": "staticText",
+                    "text": "textCloud",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "hDocker": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerDocker",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tDocker": {
+                    "type": "staticText",
+                    "text": "textDocker",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "hEnergy": {
+                    "type": "header",
+                    "size": 4,
+                    "text": "headerEnergy",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                },
+                "tEnergy": {
+                    "type": "staticText",
+                    "text": "textEnergy",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 12,
+                    "lg": 12,
+                    "xl": 12
+                }
+            }
+        }
+    }
+}

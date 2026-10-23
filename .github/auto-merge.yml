@@ -1,0 +1,12 @@
+# Welche Dependabot-Updates der Automerge-Workflow selbst zusammenfuehren darf.
+# Vorlage von @iobroker/create-adapter: Patches fuer Laufzeitabhaengigkeiten, Sicherheitskorrekturen
+# bis Minor, Entwicklungsabhaengigkeiten bis Minor. Hauptversionen (z. B. eslint 10) bleiben Handarbeit.
+- match:
+    dependency_type: production
+    update_type: "semver:patch"
+- match:
+    dependency_type: production
+    update_type: "security:minor"
+- match:
+    dependency_type: development
+    update_type: "semver:minor"
