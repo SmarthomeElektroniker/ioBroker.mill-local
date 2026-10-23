@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mill-local",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "news": {
+      "0.2.1": {
+        "en": "Release via GitHub Actions with npm provenance (no functional changes).",
+        "de": "Veröffentlichung über GitHub Actions mit npm-Herkunftsnachweis (keine funktionalen Änderungen).",
+        "ru": "Выпуск через GitHub Actions с подтверждением происхождения npm (без функциональных изменений).",
+        "pt": "Lançamento via GitHub Actions com proveniência npm (sem alterações funcionais).",
+        "nl": "Release via GitHub Actions met npm-herkomstbewijs (geen functionele wijzigingen).",
+        "fr": "Publication via GitHub Actions avec provenance npm (aucun changement fonctionnel).",
+        "it": "Rilascio tramite GitHub Actions con provenienza npm (nessuna modifica funzionale).",
+        "es": "Publicación mediante GitHub Actions con procedencia npm (sin cambios funcionales).",
+        "pl": "Wydanie przez GitHub Actions z potwierdzeniem pochodzenia npm (bez zmian funkcjonalnych).",
+        "uk": "Випуск через GitHub Actions з підтвердженням походження npm (без функціональних змін).",
+        "zh-cn": "通过 GitHub Actions 发布并附带 npm 来源证明（无功能变更）。"
+      },
       "0.2.0": {
         "en": "First public release (functionally the same as 0.1.4): published on GitHub and npm, test data anonymised.",
         "de": "Erste öffentliche Version (funktional gleich 0.1.4): auf GitHub und npm veröffentlicht, Testdaten anonymisiert.",

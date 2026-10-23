@@ -1,6 +1,6 @@
 {
   "name": "iobroker.mill-local",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Mill Generation 3 heaters and sockets via their local API - no cloud.",
   "author": {
     "name": "Immanuel",

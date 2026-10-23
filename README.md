@@ -140,6 +140,10 @@ account or the cloud.
 	### **WORK IN PROGRESS**
 -->
 
+### 0.2.1 (2026-10-23)
+
+-   Release via GitHub Actions with npm provenance (no functional changes).
+
 ### 0.2.0 (2026-10-23)
 
 - First public release (functionally the same as 0.1.4): published on GitHub and npm, test data anonymised.
