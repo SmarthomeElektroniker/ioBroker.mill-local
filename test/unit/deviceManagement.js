@@ -201,7 +201,11 @@ describe('device manager', () => {
     it('an unknown operation mode is rejected before anything is written', async () => {
         const a = fakeAdapter();
         await load(a);
-        const r = await ask(a, 'dm:deviceControl', { deviceId: MAC, controlId: 'control.operationMode', state: 'Turbo' });
+        const r = await ask(a, 'dm:deviceControl', {
+            deviceId: MAC,
+            controlId: 'control.operationMode',
+            state: 'Turbo',
+        });
         assert.ok(r.result.error);
         assert.strictEqual(a.writes.length, 0);
     });

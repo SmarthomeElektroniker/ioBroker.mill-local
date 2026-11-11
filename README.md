@@ -62,6 +62,20 @@ that are no longer part of the model (e.g. `status.operationMode` next to `contr
 on start.
 `info.connection` is `true` when all configured devices are reachable.
 
+## Device manager
+
+The instance supports the ioBroker **device manager** (tab *Devices* in admin). Each configured device gets a
+card for the **running operation** only: name, reachability, the fault report of the device as a warning,
+indicators for *heating* (control signal) and *open window detected*, room temperature, humidity (sockets),
+target temperature, operation mode, on/off, heating power and energy today. Target temperature, operation
+mode and on/off can be changed on the card (only while control is enabled); the card writes the existing
+states, so the same validation applies as for scripts. A number typed into the target temperature is sent
+once the input rests for 1.5 s. The card can also request an immediate read of the device.
+
+There are deliberately **no configuration actions** on the cards (no search, add, remove or address change);
+devices are still configured in the instance settings. A device that has never answered appears with its
+name and address only. After adding devices or enabling control, reload the device list.
+
 ## Notes and pitfalls
 
 - **The device acknowledges every operation mode with `"ok"` and switches itself OFF for unknown values.**
@@ -140,6 +154,12 @@ account or the cloud.
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+
+- Device manager support (`@iobroker/dm-utils`, suggested by mcm1957 in issue #2): one card per device for the
+  running operation – reachability, fault report, heating and open-window indicators, live values, target
+  temperature, operation mode and on/off. No configuration actions; objects and settings are unchanged.
 
 ### 0.2.2 (2026-10-23)
 
