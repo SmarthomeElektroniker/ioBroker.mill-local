@@ -113,6 +113,28 @@ tests.integration(path.join(__dirname, '..'), {
                 await waitFor(`${dev}.settings.openWindowDetection`, v => v === true);
                 const ow = fake.state.requests.filter(r => r.method === 'POST' && r.path === 'open-window').pop();
                 assert.strictEqual(JSON.parse(ow.body).max_time, 3600, 'full parameter set is sent');
+
+                // device manager: the card lists the device, its switch reaches the (simulated) device
+                await harness.enableSendTo();
+                const dm = (command, message) =>
+                    new Promise(resolve => harness.sendTo('mill-local.0', command, message, resolve));
+                const info = await dm('dm:instanceInfo', null);
+                assert.strictEqual(info.apiVersion, 'v3');
+                assert.ok(!info.actions || info.actions.length === 0, 'no instance actions');
+                const list = await dm('dm:loadDevices', null);
+                assert.strictEqual(list.add.length, 1);
+                const card = list.add[0];
+                assert.strictEqual(card.id, '94e686000001');
+                assert.ok(card.controls.some(c => c.id === 'control.power' && c.type === 'switch'));
+                const res = await dm('dm:deviceControl', {
+                    deviceId: card.id,
+                    controlId: 'control.power',
+                    state: true,
+                });
+                assert.strictEqual(res.result.state.val, true);
+                await waitFor(`${dev}.control.operationMode`, v => v === 'Switch');
+                await waitFor(`${dev}.control.power`, v => v === true);
+                assert.strictEqual(fake.state.forced, 99);
             });
         });
     },
