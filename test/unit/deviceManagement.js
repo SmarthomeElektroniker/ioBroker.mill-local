@@ -143,6 +143,17 @@ describe('device manager', () => {
             card.indicators.map(i => i.id),
             ['heating', 'openWindow'],
         );
+        // info controls show label and value separated
+        assert.ok(card.controls.filter(c => c.type === 'info').every(c => c.showSemicolon === true));
+        // the main values are also directly on the card (read only rows)
+        const rows = Object.values(card.customInfo.schema.items);
+        assert.deepStrictEqual(
+            rows.map(r => r.oid),
+            ['sensor.temperature', 'sensor.humidity', 'control.targetTemperature', 'control.operationMode'].map(
+                r => `${NS}.${MAC}.${r}`,
+            ),
+        );
+        assert.ok(rows.every(r => r.type === 'state' && r.readOnly === true));
         // only reading the device, no configuration
         assert.deepStrictEqual(
             card.actions.map(x => x.id),
