@@ -13,6 +13,7 @@ const commands = require('./lib/commands');
 const { EnergyCounter, dayKey } = require('./lib/energy');
 const discovery = require('./lib/discovery');
 const schedule = require('./lib/schedule');
+const { MillDeviceManagement } = require('./lib/deviceManagement');
 
 /** Offline after this many failed polls in a row */
 const FAILS_UNTIL_OFFLINE = 3;
@@ -97,6 +98,8 @@ class MillLocal extends utils.Adapter {
         this.on('stateChange', this.onStateChange.bind(this));
         this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
+        // device manager cards (registers its own message handler for the dm:* commands)
+        this.deviceManagement = new MillDeviceManagement(this);
     }
 
     async onReady() {
@@ -776,7 +779,8 @@ class MillLocal extends utils.Adapter {
      * @param {ioBroker.Message} obj Message
      */
     async onMessage(obj) {
-        if (!obj || !obj.command) {
+        if (!obj || !obj.command || obj.command.startsWith('dm:')) {
+            // dm:* is answered by the device manager (lib/deviceManagement.js)
             return;
         }
         if (obj.command === 'discover') {

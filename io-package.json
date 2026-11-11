@@ -97,6 +97,10 @@
     "connectionType": "local",
     "dataSource": "poll",
     "messagebox": true,
+    "supportedMessages": {
+      "custom": true,
+      "deviceManager": true
+    },
     "adminUI": {
       "config": "json"
     },
