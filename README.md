@@ -162,7 +162,7 @@ account or the cloud.
 	### **WORK IN PROGRESS**
 -->
 
-### **WORK IN PROGRESS**
+### 0.3.0 (2026-11-12)
 
 - Device manager support (`@iobroker/dm-utils`, suggested by mcm1957 in issue #2): one card per device for the
   running operation – model, reachability, fault report, open-window indicator, room temperature, humidity,

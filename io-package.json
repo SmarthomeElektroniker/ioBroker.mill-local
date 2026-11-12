@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mill-local",
-    "version": "0.2.2",
+    "version": "0.3.0",
     "news": {
+      "0.3.0": {
+        "en": "Device manager: one card per device for daily operation - on/off toggle with confirmation, operation mode and target temperature on the card, room temperature, humidity, heating power and energy today. New state status.switchedOn.",
+        "de": "Geräteverwaltung: je Gerät eine Karte für den Alltag – Ein/Aus-Umschalter mit Rückfrage, Betriebsart und Solltemperatur auf der Karte, Raumtemperatur, Luftfeuchtigkeit, Heizleistung und Energie heute. Neuer Datenpunkt status.switchedOn.",
+        "ru": "Менеджер устройств: карточка для каждого устройства для повседневной работы – переключатель вкл./выкл. с подтверждением, режим работы и заданная температура на карточке, температура в помещении, влажность, мощность нагрева и энергия за сегодня. Новое состояние status.switchedOn.",
+        "pt": "Gestor de dispositivos: um cartão por dispositivo para o uso diário – interruptor ligar/desligar com confirmação, modo de funcionamento e temperatura alvo no cartão, temperatura ambiente, humidade, potência de aquecimento e energia de hoje. Novo estado status.switchedOn.",
+        "nl": "Apparaatbeheer: per apparaat een kaart voor dagelijks gebruik – aan/uit-schakelaar met bevestiging, bedrijfsmodus en doeltemperatuur op de kaart, kamertemperatuur, luchtvochtigheid, verwarmingsvermogen en energie vandaag. Nieuwe status status.switchedOn.",
+        "fr": "Gestionnaire d’appareils : une carte par appareil pour l’utilisation quotidienne – interrupteur marche/arrêt avec confirmation, mode de fonctionnement et température de consigne sur la carte, température ambiante, humidité, puissance de chauffe et énergie du jour. Nouvel état status.switchedOn.",
+        "it": "Gestione dispositivi: una scheda per dispositivo per l’uso quotidiano – interruttore acceso/spento con conferma, modalità operativa e temperatura impostata sulla scheda, temperatura ambiente, umidità, potenza di riscaldamento ed energia di oggi. Nuovo stato status.switchedOn.",
+        "es": "Gestor de dispositivos: una tarjeta por dispositivo para el uso diario – interruptor de encendido/apagado con confirmación, modo de funcionamiento y temperatura objetivo en la tarjeta, temperatura ambiente, humedad, potencia de calefacción y energía de hoy. Nuevo estado status.switchedOn.",
+        "pl": "Menedżer urządzeń: karta dla każdego urządzenia do codziennej obsługi – przełącznik wł./wył. z potwierdzeniem, tryb pracy i temperatura zadana na karcie, temperatura w pomieszczeniu, wilgotność, moc grzania i energia dzisiaj. Nowy stan status.switchedOn.",
+        "uk": "Менеджер пристроїв: картка для кожного пристрою для щоденної роботи – перемикач увімк./вимк. з підтвердженням, режим роботи та задана температура на картці, температура в приміщенні, вологість, потужність нагріву та енергія за сьогодні. Новий стан status.switchedOn.",
+        "zh-cn": "设备管理器：每台设备一张日常使用卡片——带确认的开关切换、卡片上的运行模式和目标温度、室温、湿度、加热功率和今日能耗。新增状态 status.switchedOn。"
+      },
       "0.2.2": {
         "en": "Valid roles for mode values and read-only roles while control is disabled; intervals checked in the adapter; remaining translations completed.",
         "de": "Gültige Rollen für Moduswerte und Nur-Lese-Rollen bei abgeschalteter Steuerung; Intervalle im Adapter geprüft; restliche Übersetzungen ergänzt.",
