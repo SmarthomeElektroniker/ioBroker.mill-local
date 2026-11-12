@@ -8,7 +8,7 @@
 const assert = require('node:assert');
 const { EventEmitter } = require('node:events');
 const { definitionsFor } = require('../../lib/states');
-const { MillDeviceManagement, MODE_OPTIONS, INPUT_DELAY_MS } = require('../../lib/deviceManagement');
+const { MillDeviceManagement, MODE_OPTIONS, toggleTarget, numberLineHtml } = require('../../lib/deviceManagement');
 const TEXT = require('../../lib/dmTexts');
 
 const NS = 'mill-local.0';
@@ -18,14 +18,15 @@ const LANGUAGES = ['en', 'de', 'ru', 'pt', 'nl', 'fr', 'it', 'es', 'pl', 'uk', '
 const CONFIG_IDS = ['add', 'new', 'newDevice', 'discover', 'search', 'delete', 'pair', 'pairDevice', 'unpair'];
 
 /**
- * @param {{allowControl?: boolean, caps?: Record<string, boolean>, devices?: object[]}} [opt] Options
+ * @param {{allowControl?: boolean, caps?: Record<string, boolean>, devices?: object[], on?: boolean, mode?: string, lastActiveMode?: string}} [opt] Options
  */
 function fakeAdapter(opt = {}) {
     const allowControl = opt.allowControl !== false;
     const a = new EventEmitter();
     a.namespace = NS;
     a.allowControl = allowControl;
-    a.log = { debug() {}, info() {}, warn() {}, error() {} };
+    a.warnings = [];
+    a.log = { debug() {}, info() {}, warn: m => a.warnings.push(m), error: m => a.warnings.push(m) };
     a.objects = {};
     a.states = {};
     a.writes = [];
@@ -40,14 +41,24 @@ function fakeAdapter(opt = {}) {
     a.states[`${NS}.${MAC}.control.operationMode`] = st('Control individually');
     a.states[`${NS}.${MAC}.control.power`] = st(true);
     a.states[`${NS}.${MAC}.status.power`] = st(830);
+    a.states[`${NS}.${MAC}.status.switchedOn`] = st(opt.on !== false);
+    a.objects[`${NS}.${MAC}`] = { _id: `${NS}.${MAC}`, type: 'device', common: { name: 'Bad' } };
     a.devices = opt.devices || [
-        { id: MAC, ip: '192.0.2.10', kind: 'panel', cfg: { name: 'Bad' } },
+        {
+            id: MAC,
+            ip: '192.0.2.10',
+            kind: 'panel',
+            cfg: { name: 'Bad' },
+            mode: opt.mode || 'Control individually',
+            lastActiveMode: opt.lastActiveMode || 'Control individually',
+        },
         { id: '', ip: '192.0.2.11', kind: 'unknown', cfg: { name: 'Neu' } },
     ];
     a.getForeignObjectsAsync = async pattern => {
         const prefix = pattern.replace(/\*$/, '');
         return Object.fromEntries(Object.entries(a.objects).filter(([id]) => id.startsWith(prefix)));
     };
+    a.getForeignObjectAsync = async id => a.objects[id] || null;
     a.getForeignStateAsync = async id => a.states[id] || null;
     a.setForeignStateAsync = async (id, val, ack) => {
         a.writes.push({ id, val, ack });
@@ -100,70 +111,127 @@ async function load(a) {
     return r.add;
 }
 
+
+/**
+ * Clicks the on/off toggle like the GUI: action, confirmation dialog, answer.
+ *
+ * @param {any} a Fake adapter
+ * @param {boolean} confirm Answer of the user
+ * @returns {Promise<{question: any, result: any}>} Asked text and final answer
+ */
+async function clickToggle(a, confirm) {
+    const asked = await ask(a, 'dm:deviceAction', { deviceId: MAC, actionId: 'powerToggle' });
+    assert.strictEqual(asked.type, 'confirm', JSON.stringify(asked));
+    const final = await ask(a, 'dm:actionProgress', { origin: asked.origin, confirm });
+    assert.strictEqual(final.type, 'result');
+    return { question: asked.confirm, result: final.result };
+}
+
+/**
+ * Evaluates an HTML pattern of a staticText like the admin does (template string over _states).
+ *
+ * @param {string} html Pattern
+ * @param {unknown} val Value of state v
+ * @returns {string} Result
+ */
+const render = (html, val) => new Function('_states', `return \`${html}\`;`)({ v: { val } });
+
 describe('device manager', () => {
-    it('instance info: API v3 and no instance actions (no search, no add)', async () => {
+    it('instance info: API v3, no instance actions, no identifier label', async () => {
         const a = fakeAdapter();
         new MillDeviceManagement(a);
         const info = await ask(a, 'dm:instanceInfo', null);
         assert.strictEqual(info.apiVersion, 'v3');
         assert.ok(!info.actions || info.actions.length === 0);
+        assert.ok(!info.identifierLabel);
     });
 
-    it('card shows operation, live values and the daily controls', async () => {
+    it('card: model only (no manufacturer, no MAC), toggle in the status line, values on the card', async () => {
         const a = fakeAdapter({ caps: { humidity: true } });
         const [card, unknown] = await load(a);
         assert.strictEqual(card.id, MAC);
         assert.deepStrictEqual(card.name, { objectId: `${NS}.${MAC}`, property: 'common.name' });
+        assert.ok(!('manufacturer' in card) && !('identifier' in card), 'no manufacturer, no MAC');
+        assert.ok(!JSON.stringify(card).includes('info.mac'), 'MAC state not on the card');
+        assert.deepStrictEqual(card.model, { stateId: `${NS}.${MAC}.info.model` });
         assert.strictEqual(card.status.connection.stateId, `${NS}.${MAC}.info.online`);
         assert.strictEqual(card.status.warning.stateId, `${NS}.${MAC}.info.operationKey`);
+        // no control dialog: the admin never asks for a control state
+        assert.ok(!card.controls || card.controls.length === 0);
+        // only the toggle, no refresh button
         assert.deepStrictEqual(
-            card.controls.map(c => [c.id, c.type]),
-            [
-                ['sensor.temperature', 'info'],
-                ['sensor.humidity', 'info'],
-                ['control.targetTemperature', 'number'],
-                ['control.operationMode', 'select'],
-                ['control.power', 'switch'],
-                ['status.power', 'info'],
-                ['energy.today', 'info'],
-            ],
-        );
-        for (const c of card.controls) {
-            assert.strictEqual(c.stateId, `${NS}.${MAC}.${c.id}`);
-            assert.ok(c.label && c.label.de, `${c.id}: label`);
-        }
-        const target = card.controls.find(c => c.id === 'control.targetTemperature');
-        assert.deepStrictEqual([target.min, target.max, target.step, target.unit], [5, 35, 0.5, '°C']);
-        assert.strictEqual(target.state.val, 21);
-        assert.deepStrictEqual(
-            card.controls.find(c => c.id === 'control.operationMode').options.map(o => o.value),
-            ['Control individually', 'Weekly program', 'Independent device', 'Off', 'Switch'],
+            card.actions.map(x => x.id),
+            ['powerToggle'],
         );
         assert.deepStrictEqual(
             card.indicators.map(i => i.id),
-            ['heating', 'openWindow'],
+            ['power', 'openWindow'],
         );
-        // info controls show label and value separated
-        assert.ok(card.controls.filter(c => c.type === 'info').every(c => c.showSemicolon === true));
-        // the main values are also directly on the card (read only rows)
-        const rows = Object.values(card.customInfo.schema.items);
+        const power = card.indicators[0];
+        assert.strictEqual(power.value.stateId, `${NS}.${MAC}.status.switchedOn`);
+        assert.strictEqual(power.actionId, 'powerToggle');
+        assert.strictEqual(power.hideIfEmpty, false);
+        assert.strictEqual(power.levels[0].value, true);
+        assert.strictEqual(power.levels[0].text.de, 'Ein');
+        assert.strictEqual(power.levels[0].tooltip.de, 'Ausschalten');
+        assert.strictEqual(power.levels[1].value, false);
+        assert.strictEqual(power.levels[1].text.de, 'Aus');
+        assert.strictEqual(power.levels[1].tooltip.de, 'Einschalten');
+        assert.notStrictEqual(power.levels[0].icon, power.levels[1].icon);
+
+        const items = card.customInfo.schema.items;
+        assert.deepStrictEqual(Object.keys(items), [
+            'temperature',
+            'humidity',
+            'operationMode',
+            'targetTemperature',
+            'targetSlider',
+            'power',
+            'energyToday',
+        ]);
+        // numbers as text lines, never as a (read-only) state row that the admin draws as progress bar
+        for (const key of ['temperature', 'humidity', 'targetTemperature', 'power', 'energyToday']) {
+            assert.strictEqual(items[key].type, 'staticText', key);
+            assert.strictEqual(items[key].format, 'html', key);
+            assert.ok(items[key].dependsOnStates.v.startsWith(`${NS}.${MAC}.`), key);
+        }
+        assert.strictEqual(items.power.dependsOnStates.v, `${NS}.${MAC}.status.power`);
+        assert.strictEqual(items.energyToday.dependsOnStates.v, `${NS}.${MAC}.energy.today`);
+        assert.ok(render(items.humidity.text.func.de, 45.66).includes('>46<'));
+        assert.ok(render(items.humidity.text.func.de, 45.66).includes('>%<'));
+        assert.ok(render(items.power.text.func.de, 830).includes('>830<'));
+        assert.ok(render(items.energyToday.text.func.de, 1.234).includes('>1,23<'));
+        assert.ok(render(items.energyToday.text.func.en, 1.234).includes('>1.23<'));
+        assert.ok(render(items.temperature.text.func.de, 20.62).includes('>20,6<'));
+        assert.ok(render(items.power.text.func.de, 0).includes('Heizleistung'));
+
+        // operation mode and target temperature: usable, also while the heater is off
+        const mode = items.operationMode;
+        assert.strictEqual(mode.type, 'state');
+        assert.strictEqual(mode.control, 'select');
+        assert.strictEqual(mode.oid, `${NS}.${MAC}.control.operationMode`);
+        assert.ok(!mode.readOnly);
         assert.deepStrictEqual(
-            rows.map(r => r.oid),
-            ['sensor.temperature', 'sensor.humidity', 'control.targetTemperature', 'control.operationMode'].map(
-                r => `${NS}.${MAC}.${r}`,
-            ),
+            mode.options.map(o => o.value),
+            ['Control individually', 'Weekly program', 'Independent device', 'Off', 'Switch'],
         );
-        assert.ok(rows.every(r => r.type === 'state' && r.readOnly === true));
-        // only reading the device, no configuration
-        assert.deepStrictEqual(
-            card.actions.map(x => x.id),
-            ['refresh'],
-        );
-        // the device that never answered: name and address, nothing to operate
+        const slider = items.targetSlider;
+        assert.strictEqual(slider.control, 'slider');
+        assert.strictEqual(slider.oid, `${NS}.${MAC}.control.targetTemperature`);
+        assert.deepStrictEqual([slider.min, slider.max, slider.step], [5, 35, 0.5]);
+        assert.ok(slider.controlDelay >= 500);
+
+        // the device that never answered: name only, nothing to operate
         assert.strictEqual(unknown.id, 'ip-192.0.2.11');
         assert.strictEqual(unknown.name, 'Neu');
         assert.strictEqual(unknown.status, 'disconnected');
-        assert.ok(!unknown.controls && !unknown.actions);
+        assert.ok(!unknown.controls && !unknown.actions && !unknown.identifier);
+    });
+
+    it('card is the same while the heater is off (mode and target stay usable)', async () => {
+        const [card] = await load(fakeAdapter({ on: false, mode: 'Off' }));
+        assert.ok(!card.customInfo.schema.items.operationMode.readOnly);
+        assert.ok(card.customInfo.schema.items.targetSlider);
     });
 
     it('offers no configuration action or control on any card', async () => {
@@ -171,91 +239,118 @@ describe('device manager', () => {
         for (const card of cards) {
             for (const x of [...(card.actions || []), ...(card.controls || [])]) {
                 assert.ok(!CONFIG_IDS.includes(x.id) && !CONFIG_IDS.includes(x.icon), `${x.id} on the card`);
-                assert.ok(!x.id.startsWith('settings.') && !x.id.startsWith('info.'), `${x.id} on the card`);
+                assert.ok(x.id !== 'refresh', 'no refresh button');
             }
+            const oids = Object.values((card.customInfo && card.customInfo.schema.items) || {}).map(
+                i => i.oid || (i.dependsOnStates && i.dependsOnStates.v) || '',
+            );
+            assert.ok(!oids.some(o => o.includes('.settings.') || o.includes('.info.')), oids.join());
         }
     });
 
     it('humidity only for devices that measure it', async () => {
         const [card] = await load(fakeAdapter());
-        assert.ok(!card.controls.some(c => c.id === 'sensor.humidity'));
+        assert.ok(!card.customInfo.schema.items.humidity);
     });
 
-    it('control disabled: values only, writing rejected', async () => {
+    it('control disabled: values only, the toggle shows the state but switches nothing', async () => {
         const a = fakeAdapter({ allowControl: false });
         const [card] = await load(a);
-        assert.ok(card.controls.every(c => c.type === 'info'));
-        const power = card.controls.find(c => c.id === 'control.power');
-        assert.strictEqual(power.textTrue.de, 'Ein');
-        const r = await ask(a, 'dm:deviceControl', { deviceId: MAC, controlId: 'control.power', state: false });
-        assert.ok(r.result.error, 'control without handler must fail');
-        assert.strictEqual(a.writes.length, 0);
-    });
-
-    it('switch and select write the state as command (ack=false)', async () => {
-        const a = fakeAdapter();
-        await load(a);
-        let r = await ask(a, 'dm:deviceControl', { deviceId: MAC, controlId: 'control.power', state: false });
-        assert.strictEqual(r.result.state.val, false);
-        r = await ask(a, 'dm:deviceControl', {
-            deviceId: MAC,
-            controlId: 'control.operationMode',
-            state: 'Weekly program',
-        });
-        assert.strictEqual(r.result.state.val, 'Weekly program');
-        assert.deepStrictEqual(a.writes, [
-            { id: `${NS}.${MAC}.control.power`, val: false, ack: false },
-            { id: `${NS}.${MAC}.control.operationMode`, val: 'Weekly program', ack: false },
-        ]);
-    });
-
-    it('an unknown operation mode is rejected before anything is written', async () => {
-        const a = fakeAdapter();
-        await load(a);
-        const r = await ask(a, 'dm:deviceControl', {
-            deviceId: MAC,
-            controlId: 'control.operationMode',
-            state: 'Turbo',
-        });
+        assert.deepStrictEqual(card.actions, []);
+        assert.ok(!card.indicators[0].actionId);
+        assert.strictEqual(card.indicators[0].levels[0].tooltip.de, 'Eingeschaltet');
+        assert.strictEqual(card.customInfo.schema.items.operationMode.readOnly, true);
+        assert.ok(!card.customInfo.schema.items.targetSlider);
+        const r = await ask(a, 'dm:deviceAction', { deviceId: MAC, actionId: 'powerToggle' });
         assert.ok(r.result.error);
         assert.strictEqual(a.writes.length, 0);
     });
 
-    it('target temperature is sent once, after the input rests', async () => {
+    it('toggle switches off after confirmation (control.power=false, ack=false)', async () => {
         const a = fakeAdapter();
         await load(a);
-        for (const v of [2, 21, 21.5]) {
-            const r = await ask(a, 'dm:deviceControl', {
-                deviceId: MAC,
-                controlId: 'control.targetTemperature',
-                state: v,
-            });
-            assert.strictEqual(r.result.state.val, v);
-        }
-        assert.strictEqual(a.writes.length, 0, 'nothing sent while typing');
-        assert.ok(a.timers.every(t => t.ms === INPUT_DELAY_MS));
-        a.runTimers();
-        await new Promise(r => setImmediate(r));
-        assert.deepStrictEqual(a.writes, [{ id: `${NS}.${MAC}.control.targetTemperature`, val: 21.5, ack: false }]);
+        const { question, result } = await clickToggle(a, true);
+        assert.strictEqual(question.de, '„Bad“ ausschalten?');
+        assert.deepStrictEqual(result, { refresh: 'none' });
+        assert.deepStrictEqual(a.writes, [{ id: `${NS}.${MAC}.control.power`, val: false, ack: false }]);
     });
 
-    it('a half-typed temperature out of range is not sent', async () => {
+    it('toggle does nothing when the confirmation is cancelled', async () => {
         const a = fakeAdapter();
         await load(a);
-        await ask(a, 'dm:deviceControl', { deviceId: MAC, controlId: 'control.targetTemperature', state: 2 });
-        a.runTimers();
-        await new Promise(r => setImmediate(r));
+        await clickToggle(a, false);
         assert.strictEqual(a.writes.length, 0);
     });
 
-    it('reads the current value for the GUI and refreshes on request', async () => {
-        const a = fakeAdapter();
+    it('toggle switches on into the last active mode and names it', async () => {
+        const a = fakeAdapter({ on: false, mode: 'Off', lastActiveMode: 'Weekly program' });
         await load(a);
-        let r = await ask(a, 'dm:deviceControlState', { deviceId: MAC, controlId: 'sensor.temperature' });
-        assert.strictEqual(r.result.state.val, 21.4);
-        r = await ask(a, 'dm:deviceAction', { deviceId: MAC, actionId: 'refresh' });
-        assert.deepStrictEqual(r.result, { refresh: 'none' });
-        assert.deepStrictEqual(a.writes, [{ id: `${NS}.${MAC}.refresh`, val: true, ack: false }]);
+        const { question } = await clickToggle(a, true);
+        assert.strictEqual(question.de, '„Bad“ einschalten (Wochenprogramm)?');
+        assert.deepStrictEqual(a.writes, [
+            { id: `${NS}.${MAC}.control.operationMode`, val: 'Weekly program', ack: false },
+        ]);
+    });
+
+    it('toggle target: only documented modes, "Switch" via the relay', () => {
+        assert.deepStrictEqual(toggleTarget(true, 'Control individually', 'Control individually'), {
+            rel: 'control.power',
+            val: false,
+            mode: 'Off',
+        });
+        assert.deepStrictEqual(toggleTarget(true, 'Switch', 'Switch'), {
+            rel: 'control.power',
+            val: false,
+            mode: 'Switch',
+        });
+        assert.deepStrictEqual(toggleTarget(false, 'Switch', 'Switch'), {
+            rel: 'control.power',
+            val: true,
+            mode: 'Switch',
+        });
+        assert.deepStrictEqual(toggleTarget(false, 'Off', 'Switch'), {
+            rel: 'control.power',
+            val: true,
+            mode: 'Switch',
+        });
+        assert.deepStrictEqual(toggleTarget(false, 'Off', 'Independent device'), {
+            rel: 'control.operationMode',
+            val: 'Independent device',
+            mode: 'Independent device',
+        });
+        // unknown values would switch the real device off - never sent
+        for (const last of ['Turbo', '', undefined, 'Off', 'OFF']) {
+            assert.deepStrictEqual(toggleTarget(false, 'Off', last), {
+                rel: 'control.operationMode',
+                val: 'Control individually',
+                mode: 'Control individually',
+            });
+        }
+    });
+
+    it('no warnings from dm-utils (e.g. "Device get state ... has no handler")', async () => {
+        const a = fakeAdapter({ caps: { humidity: true } });
+        const cards = await load(a);
+        for (const card of cards) {
+            for (const c of card.controls || []) {
+                // a control would make the admin ask dm:deviceControlState
+                const r = await ask(a, 'dm:deviceControlState', { deviceId: card.id, controlId: c.id });
+                assert.ok(!r.result.error, `${c.id}: ${JSON.stringify(r.result)}`);
+            }
+        }
+        await clickToggle(a, false);
+        assert.deepStrictEqual(a.warnings, []);
+    });
+
+    it('number lines: no curly braces inside the expression, value right, unit beside it', () => {
+        const html = numberLineHtml({ en: 'Humidity', de: 'Luftfeuchtigkeit' }, '%', 0);
+        for (const h of Object.values(html)) {
+            const expr = h.match(/\$\{(.*?)\}/g);
+            assert.strictEqual(expr.length, 1);
+            assert.ok(!expr[0].slice(2, -1).includes('{'));
+        }
+        assert.ok(render(html.de, 61.4).includes('Luftfeuchtigkeit'));
+        assert.ok(render(html.de, 61.4).includes('>61<'));
     });
 
     it('no devices: empty list', async () => {

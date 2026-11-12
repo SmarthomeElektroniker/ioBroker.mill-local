@@ -414,6 +414,12 @@ class MillLocal extends utils.Adapter {
         // the relay follows the control signal; current_power stays 0 when nothing is plugged in,
         // and switched_on was false on a real socket while its relay was closed
         await this.setVal(dev, 'status.controlSignal', model.round(c.control_signal, 1));
+        // switched on = not off: a thermostat mode counts even while it does not heat, "Switch" only with the relay closed
+        await this.setVal(
+            dev,
+            'status.switchedOn',
+            mode === commands.SWITCH_MODE ? signal > 0 : !!mode && mode !== 'Off',
+        );
         await this.setVal(dev, 'status.openWindowActive', ow.active);
         await this.setVal(dev, 'status.cloudConnected', !!c.connected_to_cloud);
         await this.setVal(dev, 'info.lastUpdate', now);

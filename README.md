@@ -65,12 +65,19 @@ on start.
 ## Device manager
 
 The instance supports the ioBroker **device manager** (tab *Devices* in admin). Each configured device gets a
-card for the **running operation** only: name, reachability, the fault report of the device as a warning,
-indicators for *heating* (control signal) and *open window detected*, room temperature, humidity (sockets),
-target temperature, operation mode, on/off, heating power and energy today. Target temperature, operation
-mode and on/off can be changed on the card (only while control is enabled); the card writes the existing
-states, so the same validation applies as for scripts. A number typed into the target temperature is sent
-once the input rests for 1.5 s. The card can also request an immediate read of the device.
+card for the **running operation** only: name and model, reachability, the fault report of the device as a
+warning, an *open window detected* indicator, room temperature, humidity (sockets), operation mode, target
+temperature, heating power (W) and the estimated energy of today. All values are on the card itself.
+
+- **On/off** is a toggle in the status line; its symbol and text follow the new state
+  `status.switchedOn` (off = operation mode *Off*, or *Switch* with the relay open). A click asks for
+  confirmation. *Off* writes `control.power = false`; *on* returns to the last active operation mode
+  (a thermostat mode, or *Switch* with the relay closed) – never permanent heating from a thermostat mode.
+- **Operation mode** (select) and **target temperature** (slider, sent once it rests for 1 s) stay usable
+  while the heater is off; choosing a mode other than *Off* switches it on.
+
+Controls exist only while control is enabled. The card writes the existing states (ack=false), so the same
+validation applies as for scripts – only the documented operation modes are ever sent.
 
 There are deliberately **no configuration actions** on the cards (no search, add, remove or address change);
 devices are still configured in the instance settings. A device that has never answered appears with its
@@ -158,8 +165,10 @@ account or the cloud.
 ### **WORK IN PROGRESS**
 
 - Device manager support (`@iobroker/dm-utils`, suggested by mcm1957 in issue #2): one card per device for the
-  running operation – reachability, fault report, heating and open-window indicators, live values, target
-  temperature, operation mode and on/off. No configuration actions; objects and settings are unchanged.
+  running operation – model, reachability, fault report, open-window indicator, room temperature, humidity,
+  heating power and energy today; on/off toggle with confirmation, operation mode and target temperature
+  directly on the card (also while off). No configuration actions.
+- New state `status.switchedOn`: false only when the heater is off (mode *Off*, or *Switch* with the relay open).
 
 ### 0.2.2 (2026-10-23)
 

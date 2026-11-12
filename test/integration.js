@@ -114,7 +114,7 @@ tests.integration(path.join(__dirname, '..'), {
                 const ow = fake.state.requests.filter(r => r.method === 'POST' && r.path === 'open-window').pop();
                 assert.strictEqual(JSON.parse(ow.body).max_time, 3600, 'full parameter set is sent');
 
-                // device manager: the card lists the device, its switch reaches the (simulated) device
+                // device manager: the card lists the device, its on/off toggle reaches the (simulated) device
                 await harness.enableSendTo();
                 const dm = (command, message) =>
                     new Promise(resolve => harness.sendTo('mill-local.0', command, message, resolve));
@@ -125,15 +125,44 @@ tests.integration(path.join(__dirname, '..'), {
                 assert.strictEqual(list.add.length, 1);
                 const card = list.add[0];
                 assert.strictEqual(card.id, '94e686000001');
-                assert.ok(card.controls.some(c => c.id === 'control.power' && c.type === 'switch'));
-                const res = await dm('dm:deviceControl', {
-                    deviceId: card.id,
-                    controlId: 'control.power',
-                    state: true,
-                });
-                assert.strictEqual(res.result.state.val, true);
+                assert.ok(!card.identifier && !card.manufacturer, 'no MAC, no manufacturer');
+                assert.ok(!card.controls || card.controls.length === 0, 'no control dialog');
+                assert.deepStrictEqual(card.actions.map(a => a.id), ['powerToggle']);
+                assert.strictEqual(card.indicators[0].value.stateId, `${dev}.status.switchedOn`);
+                // weekly program is running -> switched on; the toggle asks, then switches off
+                await waitFor(`${dev}.status.switchedOn`, v => v === true);
+                const click = async confirm => {
+                    const asked = await dm('dm:deviceAction', { deviceId: card.id, actionId: 'powerToggle' });
+                    assert.strictEqual(asked.type, 'confirm', JSON.stringify(asked));
+                    const done = await dm('dm:actionProgress', { origin: asked.origin, confirm });
+                    assert.deepStrictEqual(done.result, { refresh: 'none' });
+                    return asked.confirm;
+                };
+                assert.ok((await click(true)).en.includes('Switch off'));
+                await waitFor(`${dev}.control.operationMode`, v => v === 'Off');
+                await waitFor(`${dev}.status.switchedOn`, v => v === false);
+                assert.strictEqual(fake.state.mode, 'OFF');
+                // on again: back into the last active mode, not into permanent heating
+                assert.ok((await click(true)).en.includes('Weekly program'));
+                await waitFor(`${dev}.control.operationMode`, v => v === 'Weekly program');
+                await waitFor(`${dev}.status.switchedOn`, v => v === true);
+                assert.strictEqual(fake.state.mode, 'Weekly program');
+                // cancelled: nothing is sent
+                const posts = fake.state.requests.filter(r => r.method === 'POST').length;
+                await click(false);
+                await new Promise(r => setTimeout(r, 1000));
+                assert.strictEqual(fake.state.requests.filter(r => r.method === 'POST').length, posts);
+                // the mode select of the card writes the state: a thermostat mode switches on from Off
+                await harness.states.setStateAsync(`${dev}.control.operationMode`, { val: 'Off', ack: false });
+                await waitFor(`${dev}.status.switchedOn`, v => v === false);
+                await harness.states.setStateAsync(`${dev}.control.operationMode`, { val: 'Control individually', ack: false });
+                await waitFor(`${dev}.status.switchedOn`, v => v === true);
+                // "Switch" with the relay open counts as off, the toggle closes the relay
+                await harness.states.setStateAsync(`${dev}.control.operationMode`, { val: 'Switch', ack: false });
                 await waitFor(`${dev}.control.operationMode`, v => v === 'Switch');
-                await waitFor(`${dev}.control.power`, v => v === true);
+                await waitFor(`${dev}.status.switchedOn`, v => v === false);
+                await click(true);
+                await waitFor(`${dev}.status.switchedOn`, v => v === true);
                 assert.strictEqual(fake.state.forced, 99);
             });
         });

@@ -25,10 +25,12 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
 - **Ohne Internet:** Lokale API und Betriebsart „Control individually“ laufen ohne Internet; Wochenprogramm
   und Timer brauchen die Uhrzeit, die das Gerät nur aus dem Internet holt.
 - **Geräteverwaltung (Reiter „Geräte“ im Admin):** je Gerät eine Karte für den laufenden Betrieb – Erreichbarkeit,
-  Störungsmeldung, Anzeige „heizt“ und „Fenster offen“, Raumtemperatur, Feuchte, Solltemperatur, Betriebsart,
-  Ein/Aus, Leistung und Energie heute. Soll, Betriebsart und Ein/Aus sind auf der Karte bedienbar (nur bei
-  eingeschalteter Steuerung). Bewusst keine Konfiguration auf den Karten – Geräte werden weiter in den
-  Instanzeinstellungen eingetragen.
+  Modell, Störungsmeldung, Anzeige „Fenster offen“, Raumtemperatur, Feuchte, Betriebsart, Solltemperatur,
+  Heizleistung (W) und geschätzte Energie heute. Ein/Aus ist ein Umschalter in der Statuszeile mit Rückfrage
+  (folgt dem neuen Datenpunkt `status.switchedOn`; „Ein“ kehrt in die zuletzt aktive Betriebsart zurück).
+  Betriebsart und Solltemperatur sind auch im ausgeschalteten Zustand bedienbar, eine Betriebsart außer „Aus“
+  schaltet ein (alles nur bei eingeschalteter Steuerung). Bewusst keine Konfiguration auf den Karten – Geräte
+  werden weiter in den Instanzeinstellungen eingetragen.
 - Die Energiewerte sind geschätzt (Leistung × Zeit zwischen zwei Abfragen).
 - **Unterschied zu `millheater`:** Jener Adapter nutzt ebenfalls die lokale API, aber ein Gerät je Instanz (Öl-
   und Panelheizungen, Soll/Betriebsart/Leistungsstufe). `mill-local` kann mehrere Geräte je Instanz samt Suche,
