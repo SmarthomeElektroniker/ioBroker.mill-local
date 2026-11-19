@@ -101,19 +101,42 @@ describe('commands', () => {
             assert.strictEqual(fake.state.openWindow.max_time, 1800);
         });
 
-        it('ON always switches the relay on in manual mode, OFF switches off safely', async () => {
-            for (const mode of ['Control individually', 'Weekly program', 'Independent device', 'Off', 'Switch']) {
-                await execute(client, 'control.power', true, { mode });
-                assert.strictEqual(fake.state.mode, 'Independent device', mode);
-                assert.strictEqual(fake.state.forced, 99, mode);
+        it('ON returns to the last thermostat mode, never to permanent heating; OFF switches off safely', async () => {
+            const posts = () => fake.state.requests.filter(r => r.method === 'POST');
+            // from Off: last thermostat mode
+            fake.state.mode = 'OFF';
+            await execute(client, 'control.power', true, { mode: 'Off', lastThermostatMode: 'Weekly program' });
+            assert.strictEqual(fake.state.mode, 'Weekly program');
+            assert.strictEqual(fake.state.forced, null);
+            // unknown or missing last mode (or "Switch"): Control individually
+            for (const last of [undefined, '', 'Switch', 'Off', 'Turbo']) {
+                fake.state.mode = 'OFF';
+                await execute(client, 'control.power', true, { mode: 'Off', lastThermostatMode: last });
+                assert.strictEqual(fake.state.mode, 'Control individually', String(last));
+                assert.strictEqual(fake.state.forced, null);
             }
-            await execute(client, 'control.power', false, { mode: 'Switch' });
-            assert.strictEqual(fake.state.forced, 0);
-            await execute(client, 'control.operationMode', 'Control individually', {});
+            // already in a thermostat mode: nothing is sent
+            for (const mode of ['Control individually', 'Weekly program', 'Independent device']) {
+                const n = posts().length;
+                await execute(client, 'control.power', true, { mode });
+                assert.strictEqual(posts().length, n, mode);
+            }
+            assert.ok(!posts().some(r => r.path === 'set-temperature-in-independent-mode-now'), 'relay never forced');
+            // OFF from a thermostat mode: operation mode Off
             await execute(client, 'control.power', false, { mode: 'Control individually' });
             assert.strictEqual(fake.state.mode, 'OFF');
             await execute(client, 'control.targetTemperature', 19, { mode: 'Independent device' });
-            assert.ok(fake.state.requests.some(r => r.path === 'set-temperature-in-independent-mode-now'));
+            assert.ok(posts().some(r => r.path === 'set-temperature-in-independent-mode-now'));
+        });
+
+        it('resulting mode after control.power', () => {
+            const { powerResult } = require('../../lib/commands');
+            assert.strictEqual(powerResult(true, { mode: 'Off', lastThermostatMode: 'Independent device' }), 'Independent device');
+            assert.strictEqual(powerResult(true, { mode: 'Off', lastThermostatMode: 'Switch' }), 'Control individually');
+            assert.strictEqual(powerResult(true, { mode: 'Weekly program' }), 'Weekly program');
+            assert.strictEqual(powerResult(true, { mode: 'Switch' }), 'Switch');
+            assert.strictEqual(powerResult(false, { mode: 'Switch' }), 'Switch');
+            assert.strictEqual(powerResult(false, { mode: 'Weekly program' }), 'Off');
         });
 
         it('weekly program, timers and vacation reach the device in its format', async () => {
@@ -148,7 +171,8 @@ describe('commands', () => {
         });
 
         it('leaving Switch for Independent device sets the Normal temperature again', async () => {
-            await execute(client, 'control.power', true, { mode: 'Control individually' });
+            await execute(client, 'control.operationMode', 'Switch', { mode: 'Control individually' });
+            await execute(client, 'control.power', true, { mode: 'Switch' });
             assert.strictEqual(fake.state.forced, 99);
             await execute(client, 'control.operationMode', 'Independent device', { mode: 'Switch', normal: 17 });
             const last = fake.state.requests.filter(r => r.method === 'POST').pop();

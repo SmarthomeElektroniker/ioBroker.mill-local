@@ -76,21 +76,34 @@ tests.integration(path.join(__dirname, '..'), {
                 assert.strictEqual(fake.state.requests.filter(r => r.method === 'POST').length, before);
                 assert.strictEqual(fake.state.mode, 'Control individually');
 
-                // ON: always on in manual mode (relay closed) - from a thermostat mode
+                // ON in a thermostat mode: already on, nothing changes - no permanent heating
                 await harness.states.setStateAsync(`${dev}.control.power`, { val: true, ack: false });
-                await waitFor(`${dev}.control.operationMode`, v => v === 'Switch');
                 await waitFor(`${dev}.control.power`, v => v === true);
-                assert.strictEqual(fake.state.forced, 99);
-                // OFF in manual mode: relay open
-                await harness.states.setStateAsync(`${dev}.control.power`, { val: false, ack: false });
-                await waitFor(`${dev}.control.power`, v => v === false);
-                assert.strictEqual(fake.state.forced, 0);
-                await harness.states.setStateAsync(`${dev}.control.operationMode`, { val: 'Control individually', ack: false });
-                await waitFor(`${dev}.control.operationMode`, v => v === 'Control individually');
+                await new Promise(r => setTimeout(r, 1000));
+                assert.strictEqual(fake.state.mode, 'Control individually');
+                assert.strictEqual(fake.state.forced, null);
                 // OFF in a thermostat mode: operation mode Off
                 await harness.states.setStateAsync(`${dev}.control.power`, { val: false, ack: false });
                 await waitFor(`${dev}.control.operationMode`, v => v === 'Off');
+                await waitFor(`${dev}.control.power`, v => v === false);
                 assert.strictEqual(fake.state.mode, 'OFF');
+                // ON from Off: back into the last thermostat mode
+                await harness.states.setStateAsync(`${dev}.control.power`, { val: true, ack: false });
+                await waitFor(`${dev}.control.operationMode`, v => v === 'Control individually');
+                await waitFor(`${dev}.control.power`, v => v === true);
+                assert.strictEqual(fake.state.mode, 'Control individually');
+                assert.strictEqual(fake.state.forced, null);
+                // permanent heating only via the operation mode "Switch": there control.power is the relay
+                await harness.states.setStateAsync(`${dev}.control.operationMode`, { val: 'Switch', ack: false });
+                await waitFor(`${dev}.control.operationMode`, v => v === 'Switch');
+                await waitFor(`${dev}.control.power`, v => v === false);
+                await harness.states.setStateAsync(`${dev}.control.power`, { val: true, ack: false });
+                await waitFor(`${dev}.status.heating`, v => v === true);
+                assert.strictEqual(fake.state.forced, 99);
+                await harness.states.setStateAsync(`${dev}.control.power`, { val: false, ack: false });
+                await waitFor(`${dev}.status.heating`, v => v === false);
+                await waitFor(`${dev}.control.operationMode`, v => v === 'Switch');
+                assert.strictEqual(fake.state.forced, 0);
                 await harness.states.setStateAsync(`${dev}.control.operationMode`, { val: 'Control individually', ack: false });
                 await waitFor(`${dev}.control.operationMode`, v => v === 'Control individually');
 

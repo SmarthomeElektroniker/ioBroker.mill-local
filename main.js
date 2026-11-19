@@ -55,7 +55,7 @@ class Device {
         this.fails = 0;
         this.cycle = 0;
         this.mode = '';
-        this.lastActiveMode = 'Control individually';
+        this.lastThermostatMode = 'Control individually';
         this.lastRediscover = 0;
         this.wrongDeviceLogged = false;
         this.offlineLogged = false;
@@ -399,8 +399,8 @@ class MillLocal extends utils.Adapter {
         }
         if (dev.writeSeq === seq) {
             dev.mode = mode;
-            if (mode && mode !== 'Off') {
-                dev.lastActiveMode = mode;
+            if (commands.THERMOSTAT_MODES.includes(mode)) {
+                dev.lastThermostatMode = mode;
             }
         }
         const power = model.round(c.current_power, 1) ?? 0;
@@ -415,11 +415,10 @@ class MillLocal extends utils.Adapter {
         // and switched_on was false on a real socket while its relay was closed
         await this.setVal(dev, 'status.controlSignal', model.round(c.control_signal, 1));
         // switched on = not off: a thermostat mode counts even while it does not heat, "Switch" only with the relay closed
-        await this.setVal(
-            dev,
-            'status.switchedOn',
-            mode === commands.SWITCH_MODE ? signal > 0 : !!mode && mode !== 'Off',
-        );
+        const switchedOn = mode === commands.SWITCH_MODE ? signal > 0 : !!mode && mode !== 'Off';
+        await this.setVal(dev, 'status.switchedOn', switchedOn);
+        // relay closed = heats right now (control signal > 0), in every mode
+        await this.setVal(dev, 'status.heating', signal > 0);
         // active target: null (not 0) while off or in "Switch"
         await this.setStateChangedAsync(`${dev.id}.status.activeTargetTemperature`, {
             val: model.activeTargetTemperature(c.set_temperature, mode),
@@ -444,8 +443,8 @@ class MillLocal extends utils.Adapter {
         dev.normal = Number(normal.value);
         await this.mirror(dev, seq, 'control.targetTemperature', model.round(normal.value, 2));
         await this.mirror(dev, seq, 'control.operationMode', mode);
-        // on/off shows the relay (current at the output), in every mode
-        await this.mirror(dev, seq, 'control.power', mode !== 'Off' && signal > 0);
+        // on/off of the thermostat: same as status.switchedOn (the relay is status.heating)
+        await this.mirror(dev, seq, 'control.power', switchedOn);
         await this.mirror(dev, seq, 'settings.openWindowDetection', ow.enabled);
     }
 
@@ -758,17 +757,21 @@ class MillLocal extends utils.Adapter {
         // readings that started before this command must not overwrite its result
         dev.writeSeq++;
         try {
-            const sent = await commands.execute(dev.client, sub, state.val, {
+            const ctx = {
                 mode: dev.mode,
-                lastActiveMode: dev.lastActiveMode,
+                lastThermostatMode: dev.lastThermostatMode,
                 kind: dev.kind,
                 normal: dev.normal,
-            });
+            };
+            const sent = await commands.execute(dev.client, sub, state.val, ctx);
             if (sub === 'control.operationMode') {
                 dev.mode = String(sent);
             } else if (sub === 'control.power') {
-                // ON always ends in the manual mode "Switch"; OFF in "Switch" keeps it, otherwise "Off"
-                dev.mode = sent || dev.mode === commands.SWITCH_MODE ? commands.SWITCH_MODE : 'Off';
+                // ON: last thermostat mode, or the relay closed in "Switch"; OFF: "Off", or the relay open in "Switch"
+                dev.mode = commands.powerResult(!!sent, ctx);
+            }
+            if (commands.THERMOSTAT_MODES.includes(dev.mode)) {
+                dev.lastThermostatMode = dev.mode;
             }
             if (sub === 'control.restart') {
                 this.log.info(`${dev.id}: restart requested, the device is unreachable for a few seconds`);

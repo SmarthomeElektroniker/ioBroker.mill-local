@@ -61,4 +61,25 @@ describe('object model', () => {
         assert.ok(!ids.includes('settings.pidKp'));
         assert.ok(STATES.length > ids.length);
     });
+
+    it('offers the type detector exactly one setpoint, one actual temperature and the on/off switch', () => {
+        // patterns of @iobroker/type-detector (thermostat): SET = writable *temperature, ACTUAL = read-only *temperature
+        const defs = definitionsFor(ALL_CAPS, true);
+        const temps = defs.filter(d => /temperature(\..*)?$/.test(d.common.role));
+        assert.deepStrictEqual(
+            temps.filter(d => d.common.write).map(d => d.id),
+            ['control.targetTemperature'],
+        );
+        assert.deepStrictEqual(
+            temps.filter(d => !d.common.write).map(d => d.id),
+            ['sensor.temperature'],
+        );
+        assert.deepStrictEqual(
+            defs.filter(d => d.common.role === 'switch.power').map(d => d.id),
+            ['control.power'],
+        );
+        const active = defs.find(d => d.id === 'status.activeTargetTemperature');
+        assert.strictEqual(active.common.role, 'value');
+        assert.strictEqual(active.common.unit, '°C');
+    });
 });

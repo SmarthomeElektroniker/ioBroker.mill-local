@@ -18,7 +18,7 @@ const LANGUAGES = ['en', 'de', 'ru', 'pt', 'nl', 'fr', 'it', 'es', 'pl', 'uk', '
 const CONFIG_IDS = ['add', 'new', 'newDevice', 'discover', 'search', 'delete', 'pair', 'pairDevice', 'unpair'];
 
 /**
- * @param {{allowControl?: boolean, caps?: Record<string, boolean>, devices?: object[], on?: boolean, mode?: string, lastActiveMode?: string}} [opt] Options
+ * @param {{allowControl?: boolean, caps?: Record<string, boolean>, devices?: object[], on?: boolean, mode?: string, lastThermostatMode?: string}} [opt] Options
  */
 function fakeAdapter(opt = {}) {
     const allowControl = opt.allowControl !== false;
@@ -50,7 +50,7 @@ function fakeAdapter(opt = {}) {
             kind: 'panel',
             cfg: { name: 'Bad' },
             mode: opt.mode || 'Control individually',
-            lastActiveMode: opt.lastActiveMode || 'Control individually',
+            lastThermostatMode: opt.lastThermostatMode || 'Control individually',
         },
         { id: '', ip: '192.0.2.11', kind: 'unknown', cfg: { name: 'Neu' } },
     ];
@@ -283,7 +283,7 @@ describe('device manager', () => {
     });
 
     it('toggle switches on into the last active mode and names it', async () => {
-        const a = fakeAdapter({ on: false, mode: 'Off', lastActiveMode: 'Weekly program' });
+        const a = fakeAdapter({ on: false, mode: 'Off', lastThermostatMode: 'Weekly program' });
         await load(a);
         const { question } = await clickToggle(a, true);
         assert.strictEqual(question.de, '„Bad“ einschalten (Wochenprogramm)?');
@@ -308,10 +308,11 @@ describe('device manager', () => {
             val: true,
             mode: 'Switch',
         });
+        // permanent heating only in the operation mode "Switch" itself, never from Off
         assert.deepStrictEqual(toggleTarget(false, 'Off', 'Switch'), {
-            rel: 'control.power',
-            val: true,
-            mode: 'Switch',
+            rel: 'control.operationMode',
+            val: 'Control individually',
+            mode: 'Control individually',
         });
         assert.deepStrictEqual(toggleTarget(false, 'Off', 'Independent device'), {
             rel: 'control.operationMode',
