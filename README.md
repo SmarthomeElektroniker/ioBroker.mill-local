@@ -136,6 +136,42 @@ name and address only. After adding devices or enabling control, reload the devi
 - Energy values are an **estimate** (power × time between two polls); gaps are not counted.
 - ioBroker in Docker: works in a bridge network, the adapter only opens outgoing HTTP connections.
 
+## Migration from ioBroker.millheater
+
+1. Open the instance settings of mill-local, tab *Devices*, and press **Take over from millheater**. The adapter
+   reads every `millheater.<n>` instance (address, polling intervals, timeout) and the MAC address and name from
+   its states, and fills the device table (an existing row with the same MAC or address is updated, not
+   duplicated). Intervals outside the limits of mill-local are adjusted to them.
+2. Save, then **stop the millheater instance(s)**: a Mill device answers one request at a time, two adapters
+   polling the same device run into timeouts.
+3. Point scripts, visualisations and aliases to the new IDs (`<mac>` = MAC address, 12 hex digits):
+
+| millheater (`millheater.<n>.`) | mill-local (`mill-local.<n>.<mac>.`) | Note |
+|---|---|---|
+| `control-status.ambient_temperature` | `sensor.temperature` | |
+| `control-status.raw_ambient_temperature` | `sensor.temperatureRaw` | |
+| `control-status.set_temperature` (write) | `control.targetTemperature` | Normal temperature, also readable while off |
+| `control-status.set_temperature` (read) | `status.activeTargetTemperature` | empty (not 0) while off |
+| `control-status.operation_mode` | `control.operationMode` | `Off` instead of `OFF`, plus `Switch` |
+| `control-status.current_power` | `status.power` | |
+| `control-status.control_signal` | `status.controlSignal` | |
+| `control-status.switched_on` | `status.heating` | relay closed (from the control signal) |
+| `control-status.lock_active` | `status.lockActive` | |
+| `control-status.open_window_active_now` | `status.openWindowActive` + `settings.openWindowDetection` | two booleans instead of a text |
+| `control-status.connected_to_cloud` | `status.cloudConnected` | |
+| `settings.temperature_calibration_offset` | `settings.calibrationOffset` | |
+| `settings.heating_level_percentage` | `settings.oilHeaterPower` | oil heaters |
+| `settings.limited_heating_power` | `settings.limitedHeatingPower` | panel heaters |
+| `settings.additional_mode` | `settings.additionalSocketMode` | Wi-Fi Socket |
+| `status.name` | `info.model` | |
+| `status.custom_name` | `info.customName` | writable |
+| `status.version` | `info.firmware` | |
+| `status.mac_address` | `info.mac` | |
+| `status.operation_key` | `info.operationKey` | |
+| `info.connection` | `info.connection` / `<mac>.info.online` | per instance / per device |
+
+The history of the old states is not transferred.
+
 ## Difference to ioBroker.millheater
 
 [ioBroker.millheater](https://github.com/webbummler/ioBroker.millheater) also uses the local API and supports

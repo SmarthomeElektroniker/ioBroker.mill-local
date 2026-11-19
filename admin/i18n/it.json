@@ -44,5 +44,7 @@
   "headerEnergy": "Valori di energia",
   "textEnergy": "I dispositivi riportano solo la potenza istantanea. energy.* viene calcolato da essa tra due interrogazioni: è una stima; le interruzioni (dispositivo offline, adattatore fermo) non vengono conteggiate.",
   "labelSyncTimezone": "Allinea il fuso orario del dispositivo a ioBroker",
-  "helpSyncTimezone": "Necessario per programma settimanale, timer e vacanza; segue l'ora legale. Il dispositivo ottiene l'ora da solo via NTP da pool.ntp.org – senza Internet indirizzare questo nome a un server NTP locale (ad es. riscrittura DNS)."
+  "helpSyncTimezone": "Necessario per programma settimanale, timer e vacanza; segue l'ora legale. Il dispositivo ottiene l'ora da solo via NTP da pool.ntp.org – senza Internet indirizzare questo nome a un server NTP locale (ad es. riscrittura DNS).",
+  "btnImportMillheater": "Importa da millheater",
+  "helpImportMillheater": "Legge le istanze di ioBroker.millheater (indirizzo, MAC, intervalli) e compila la tabella dei dispositivi. Poi salvare e fermare millheater."
 }

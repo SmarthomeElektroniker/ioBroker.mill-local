@@ -13,6 +13,7 @@ const commands = require('./lib/commands');
 const { EnergyCounter, dayKey } = require('./lib/energy');
 const discovery = require('./lib/discovery');
 const { checkTiming } = require('./lib/config');
+const migration = require('./lib/migration');
 const schedule = require('./lib/schedule');
 const { MillDeviceManagement } = require('./lib/deviceManagement');
 
@@ -821,6 +822,25 @@ class MillLocal extends utils.Adapter {
     async onMessage(obj) {
         if (!obj || !obj.command || obj.command.startsWith('dm:')) {
             // dm:* is answered by the device manager (lib/deviceManagement.js)
+            return;
+        }
+        if (obj.command === 'importMillheater') {
+            // takeover from ioBroker.millheater: reads its instances, answers with the filled device table
+            let reply;
+            try {
+                const current = obj.message && typeof obj.message === 'object' ? obj.message : {};
+                const instances = await migration.readMillheaterInstances(this);
+                const devices = Array.isArray(current.devices) ? current.devices : this.config.devices;
+                const r = migration.fromMillheater(instances, { devices });
+                const text = migration.summary(r, instances.length);
+                this.log.info(text.replace(/\n/g, ' | '));
+                reply = instances.length ? { native: r.native, result: text } : { result: text };
+            } catch (err) {
+                reply = { error: err.message };
+            }
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, reply, obj.callback);
+            }
             return;
         }
         if (obj.command === 'discover') {

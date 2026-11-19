@@ -44,5 +44,7 @@
   "headerEnergy": "Energy values",
   "textEnergy": "The devices report only the momentary power. energy.* is calculated from it between two polls - an estimate, gaps (device offline, adapter stopped) are not counted.",
   "labelSyncTimezone": "Keep the device's time zone in line with ioBroker",
-  "helpSyncTimezone": "Needed for weekly program, timers and vacation; follows daylight saving time. The device takes the time itself via NTP from pool.ntp.org – without internet point that name to a local NTP server (e.g. a DNS rewrite)."
+  "helpSyncTimezone": "Needed for weekly program, timers and vacation; follows daylight saving time. The device takes the time itself via NTP from pool.ntp.org – without internet point that name to a local NTP server (e.g. a DNS rewrite).",
+  "btnImportMillheater": "Take over from millheater",
+  "helpImportMillheater": "Reads the instances of ioBroker.millheater (address, MAC, intervals) and fills the device table. Save afterwards and stop millheater."
 }

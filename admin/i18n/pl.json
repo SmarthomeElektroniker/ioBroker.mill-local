@@ -44,5 +44,7 @@
   "headerEnergy": "Wartości energii",
   "textEnergy": "Urządzenia zgłaszają tylko chwilową moc. energy.* jest z niej obliczane między dwoma odpytaniami – to szacunek; przerwy (urządzenie offline, adapter zatrzymany) nie są liczone.",
   "labelSyncTimezone": "Dopasuj strefę czasową urządzenia do ioBroker",
-  "helpSyncTimezone": "Potrzebne do programu tygodniowego, timerów i urlopu; uwzględnia czas letni. Czas urządzenie pobiera samo przez NTP z pool.ntp.org – bez internetu przekieruj tę nazwę na lokalny serwer NTP (np. przepisanie DNS)."
+  "helpSyncTimezone": "Potrzebne do programu tygodniowego, timerów i urlopu; uwzględnia czas letni. Czas urządzenie pobiera samo przez NTP z pool.ntp.org – bez internetu przekieruj tę nazwę na lokalny serwer NTP (np. przepisanie DNS).",
+  "btnImportMillheater": "Przejmij z millheater",
+  "helpImportMillheater": "Odczytuje instancje ioBroker.millheater (adres, MAC, interwały) i wypełnia tabelę urządzeń. Następnie zapisz i zatrzymaj millheater."
 }

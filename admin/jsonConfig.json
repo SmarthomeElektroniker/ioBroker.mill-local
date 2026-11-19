@@ -132,6 +132,23 @@
                     "md": 12,
                     "lg": 8,
                     "xl": 8
+                },
+                "importMillheater": {
+                    "type": "sendTo",
+                    "command": "importMillheater",
+                    "label": "btnImportMillheater",
+                    "variant": "outlined",
+                    "useNative": true,
+                    "showProcess": true,
+                    "jsonData": "{\"devices\":${JSON.stringify(data.devices || [])}}",
+                    "help": "helpImportMillheater",
+                    "newLine": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 4,
+                    "xl": 4,
+                    "timeout": 30000
                 }
             }
         },

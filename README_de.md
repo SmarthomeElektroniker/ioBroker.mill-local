@@ -36,3 +36,7 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
   Gerätearten (Konvektor, Öl, Panel, WLAN-Steckdose), mit einem Gerät je Instanz und Schwerpunkt auf Sollwert,
   Betriebsart, Kalibrierung und Leistungsstufe. `mill-local` kann mehrere Geräte je Instanz samt Suche, alle über
   die API änderbaren Einstellungen, Luftfeuchte der Steckdose, Energieschätzung und Gerätekarten.
+- **Umstieg von `millheater`:** In den Instanzeinstellungen (Reiter „Geräte“) übernimmt der Knopf **„Aus millheater
+  übernehmen“** Adresse, MAC, Name und Intervalle aller `millheater`-Instanzen in die Gerätetabelle. Danach speichern
+  und die millheater-Instanzen anhalten (das Gerät beantwortet nur eine Anfrage gleichzeitig). Die Zuordnung
+  alte ID → neue ID steht als Tabelle in der englischen README („Migration from ioBroker.millheater“).

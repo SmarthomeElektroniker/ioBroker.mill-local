@@ -44,5 +44,7 @@
   "headerEnergy": "能耗数值",
   "textEnergy": "设备只报告瞬时功率。energy.* 根据两次轮询之间的功率计算得出，属于估算值；中断期间（设备离线、适配器停止）不计入。",
   "labelSyncTimezone": "使设备时区与 ioBroker 保持一致",
-  "helpSyncTimezone": "周程序、定时器和假期需要此项；会跟随夏令时。设备通过 NTP 从 pool.ntp.org 自行获取时间——没有互联网时，请将该域名指向本地 NTP 服务器（例如 DNS 重写）。"
+  "helpSyncTimezone": "周程序、定时器和假期需要此项；会跟随夏令时。设备通过 NTP 从 pool.ntp.org 自行获取时间——没有互联网时，请将该域名指向本地 NTP 服务器（例如 DNS 重写）。",
+  "btnImportMillheater": "从 millheater 接管",
+  "helpImportMillheater": "读取 ioBroker.millheater 的实例（地址、MAC、间隔）并填写设备表。随后保存并停止 millheater。"
 }
