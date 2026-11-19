@@ -253,6 +253,20 @@ account or the cloud.
 	### **WORK IN PROGRESS**
 -->
 
+### **WORK IN PROGRESS**
+
+- (Immanuel) **Breaking:** `control.power` is now the on/off of the thermostat, as visualisations expect it: ON returns
+  to the last thermostat mode, OFF switches off. Permanent heating without thermostat only in the operation mode
+  `Switch` (there `control.power` is the relay). The relay is the new state `status.heating`.
+- (Immanuel) New states `status.activeTargetTemperature` (empty instead of 0 while off) and `status.lockActive`.
+- (Immanuel) Type detector: exactly one thermostat per device (setpoint `control.targetTemperature`, actual
+  temperature `sensor.temperature`).
+- (Immanuel) `info.connection` is true while at least one device is reachable.
+- (Immanuel) Clear warnings for invalid timing settings; empty or invalid answers keep the last values; the
+  shutdown aborts the running request and drops queued commands.
+- (Immanuel) Takeover from ioBroker.millheater (button in the instance settings), migration table in the README.
+- (Immanuel) Ideas and test scenarios from ioBroker.millheater by webbummler, MIT.
+
 ### 0.3.0 (2026-11-12)
 
 - Device manager support (`@iobroker/dm-utils`, suggested by mcm1957 in issue #2): one card per device for the
