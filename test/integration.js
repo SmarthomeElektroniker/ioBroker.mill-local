@@ -181,5 +181,134 @@ tests.integration(path.join(__dirname, '..'), {
                 assert.strictEqual(fake.state.forced, 99);
             });
         });
+
+        // Failure scenarios after the pattern of the ioBroker.millheater tests (webbummler, MIT):
+        // invalid answers, timeout, a write during a running poll and the shutdown with a request on the wire
+        suite('Failure scenarios against a simulated Mill socket', getHarness => {
+            let fake;
+            const dev = 'mill-local.0.94e686000002';
+            before(async () => {
+                fake = await createFakeMill({ mac: '94:E6:86:00:00:02' });
+            });
+            after(async () => {
+                await fake.close();
+            });
+
+            it('keeps the last valid values, survives timeouts, serialises writes and cancels on shutdown', async function () {
+                this.timeout(90000);
+                const harness = getHarness();
+                await harness.changeAdapterConfig('mill-local', {
+                    native: {
+                        devices: [{ enabled: true, name: 'Sim2', ip: fake.host, mac: '94:E6:86:00:00:02', useApiKey: false }],
+                        // no automatic polls during the test: every cycle is started with refresh
+                        pollInterval: 3600,
+                        slowInterval: 3600,
+                        timeout: 1,
+                        allowControl: true,
+                        rediscover: false,
+                    },
+                });
+                await harness.startAdapterAndWait();
+                const sleep = ms => new Promise(r => setTimeout(r, ms));
+                const waitFor = async (id, pred, ms = 15000) => {
+                    const end = Date.now() + ms;
+                    for (;;) {
+                        const s = await harness.states.getStateAsync(id);
+                        if (s && s.ack && pred(s.val)) {
+                            return s;
+                        }
+                        if (Date.now() > end) {
+                            throw new Error(`${id} did not reach the expected value, last: ${JSON.stringify(s)}`);
+                        }
+                        await sleep(200);
+                    }
+                };
+                const count = path => fake.state.requests.filter(r => r.path === path).length;
+                const poll = async () => {
+                    const n = count('control-status');
+                    await harness.states.setStateAsync(`${dev}.refresh`, { val: true, ack: false });
+                    const end = Date.now() + 10000;
+                    while (count('control-status') <= n) {
+                        if (Date.now() > end) {
+                            throw new Error('no poll');
+                        }
+                        await sleep(50);
+                    }
+                };
+                const alive = async () =>
+                    assert.strictEqual((await harness.states.getStateAsync('system.adapter.mill-local.0.alive')).val, true);
+
+                await waitFor(`${dev}.sensor.temperature`, v => v === 19.2);
+                await waitFor(`${dev}.info.online`, v => v === true);
+                await waitFor(`${dev}.status.switchedOn`, v => v === true);
+
+                // 1. invalid answers: last valid values stay (ack), the adapter keeps running
+                for (const mode of ['invalid-json', 'empty', 'api-error', 'http-error', 'not-mill']) {
+                    fake.state.responseMode = mode;
+                    await poll();
+                    await sleep(400);
+                    for (const [id, val] of [
+                        ['sensor.temperature', 19.2],
+                        ['status.switchedOn', true],
+                        ['control.operationMode', 'Control individually'],
+                    ]) {
+                        const st = await harness.states.getStateAsync(`${dev}.${id}`);
+                        assert.strictEqual(st.val, val, `${id} changed after ${mode}`);
+                        assert.strictEqual(st.ack, true);
+                    }
+                    await alive();
+                }
+                // three failed polls in a row: offline (and info.connection false - no device reachable)
+                await waitFor(`${dev}.info.online`, v => v === false);
+                await waitFor('mill-local.0.info.connection', v => v === false);
+                fake.state.responseMode = 'valid';
+                fake.state.ambient = 20.5;
+                await poll();
+                await waitFor(`${dev}.sensor.temperature`, v => v === 20.5);
+                await waitFor(`${dev}.info.online`, v => v === true);
+                await waitFor('mill-local.0.info.connection', v => v === true);
+
+                // 2. timeout: the device accepts the connection and never answers
+                fake.state.responseMode = 'hang';
+                await poll();
+                await sleep(2500);
+                assert.strictEqual((await harness.states.getStateAsync(`${dev}.sensor.temperature`)).val, 20.5);
+                await alive();
+                fake.state.responseMode = 'valid';
+                fake.state.ambient = 21;
+                await poll();
+                await waitFor(`${dev}.sensor.temperature`, v => v === 21);
+
+                // 3. a write during a running poll waits for it and is not overwritten by the older reading
+                fake.state.delays['control-status'] = 700;
+                fake.state.maxConcurrent = 0;
+                await poll();
+                await harness.states.setStateAsync(`${dev}.control.targetTemperature`, { val: 22.5, ack: false });
+                await waitFor(`${dev}.control.targetTemperature`, v => v === 22.5);
+                await sleep(2500);
+                assert.strictEqual((await harness.states.getStateAsync(`${dev}.control.targetTemperature`)).val, 22.5);
+                assert.strictEqual(fake.state.temps.Normal, 22.5);
+                assert.strictEqual(fake.state.maxConcurrent, 1, 'never two requests at the same time');
+
+                // 4. shutdown while a request is on the wire: the queued write is never sent, no waiting for the answer
+                fake.state.delays['control-status'] = 4000;
+                await poll();
+                const posts = fake.state.requests.filter(r => r.method === 'POST').length;
+                await harness.states.setStateAsync(`${dev}.control.targetTemperature`, { val: 18, ack: false });
+                await sleep(300);
+                assert.strictEqual(fake.state.requests.filter(r => r.method === 'POST').length, posts, 'write waits');
+                const t0 = Date.now();
+                await harness.stopAdapter();
+                const took = Date.now() - t0;
+                await sleep(4500);
+                assert.strictEqual(
+                    fake.state.requests.filter(r => r.method === 'POST').length,
+                    posts,
+                    'queued write was sent during shutdown',
+                );
+                assert.strictEqual(fake.state.temps.Normal, 22.5);
+                assert.ok(took < 3500, `stop took ${took} ms (waited for the slow answer?)`);
+            });
+        });
     },
 });

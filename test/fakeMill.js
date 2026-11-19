@@ -35,6 +35,11 @@ function createFakeMill(opts = {}) {
         openWindow: { active_now: false, drop_temperature_threshold: 5, drop_time_range: 900, enabled: false, increase_temperature_threshold: 3, increase_time_range: 900, max_time: 3600 },
         power: 0,
         requests: [],
+        ambient: 19.200632095336914,
+        /** Answer of /control-status: valid, invalid-json, empty, api-error, http-error, hang (never answers) */
+        responseMode: 'valid',
+        /** Extra answer delay per endpoint in ms */
+        delays: {},
         concurrent: 0,
         maxConcurrent: 0,
     };
@@ -48,7 +53,14 @@ function createFakeMill(opts = {}) {
             const path = req.url.replace(/^\//, '');
             state.requests.push({ method: req.method, path, body, auth: req.headers.authentication });
             const send = (code, obj) => {
+                const raw = typeof obj === 'string' && code === 200;
                 setTimeout(() => {
+                    if (raw) {
+                        state.concurrent--;
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(obj);
+                        return;
+                    }
                     state.concurrent--;
                     if (typeof obj === 'string') {
                         res.writeHead(code, { 'Content-Type': 'text/html' });
@@ -57,7 +69,7 @@ function createFakeMill(opts = {}) {
                         res.writeHead(code, { 'Content-Type': 'application/json' });
                         res.end(JSON.stringify({ ...obj, status: obj.status || 'ok' }, null, '\t'));
                     }
-                }, opts.delayMs || 0);
+                }, (opts.delayMs || 0) + (state.delays[path] || 0));
             };
             if (missing.has(path)) {
                 return send(404, 'This URI does not exist');
@@ -75,8 +87,25 @@ function createFakeMill(opts = {}) {
                 case 'status':
                     return send(200, { name: state.name, custom_name: state.customName, version: '0x230421', operation_key: '', mac_address: state.mac });
                 case 'control-status':
+                    switch (state.responseMode) {
+                        case 'invalid-json':
+                            return send(200, '{"ambient_temperature": 5, "operation_mode": ');
+                        case 'empty':
+                            return send(200, '');
+                        case 'api-error':
+                            return send(200, { status: 'Failed to read the sensors' });
+                        case 'http-error':
+                            return send(500, 'Internal error');
+                        case 'not-mill':
+                            return send(200, { hello: 'world' });
+                        case 'hang':
+                            // accepts the request and never answers
+                            state.concurrent--;
+                            state.hanging = (state.hanging || []).concat(res);
+                            return undefined;
+                    }
                     return send(200, {
-                        ambient_temperature: 19.200632095336914,
+                        ambient_temperature: state.ambient,
                         humidity: 61.00390625,
                         current_power: state.power,
                         control_signal: state.mode === 'Independent device' && state.forced !== null ? (state.forced >= 99 ? 100 : 0) : state.power ? 100 : 0,
@@ -201,7 +230,7 @@ function createFakeMill(opts = {}) {
     });
     return new Promise(resolve => {
         server.listen(0, '127.0.0.1', () => {
-            resolve({ server, state, host: `127.0.0.1:${server.address().port}`, close: () => new Promise(r => server.close(r)) });
+            resolve({ server, state, host: `127.0.0.1:${server.address().port}`, close: () => new Promise(r => { server.closeAllConnections(); server.close(r); }) });
         });
     });
 }

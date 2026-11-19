@@ -399,6 +399,10 @@ class MillLocal extends utils.Adapter {
     async pollFast(dev) {
         const seq = dev.writeSeq;
         const c = await dev.client.get('control-status');
+        if (typeof c.operation_mode !== 'string' || typeof c.ambient_temperature !== 'number') {
+            // answered, but not with the values of a Mill device: keep the last valid values
+            throw new Error('control-status without operation mode or temperature');
+        }
         const normal = await dev.client.get('set-temperature', { type: 'Normal' });
         const now = Date.now();
         const signal = model.round(c.control_signal, 1) ?? 0;
@@ -631,6 +635,10 @@ class MillLocal extends utils.Adapter {
      * @param {unknown} err Error
      */
     async handleFailure(dev, err) {
+        if (this.unloading) {
+            // requests cancelled by the shutdown are no failures of the device
+            return;
+        }
         dev.fails++;
         if (dev.energy) {
             dev.energy.interrupt();
@@ -638,7 +646,7 @@ class MillLocal extends utils.Adapter {
         this.log.debug(`${dev.id || dev.ip}: poll failed (${dev.fails}): ${err && err.message}`);
         if (dev.fails >= FAILS_UNTIL_OFFLINE) {
             if (!dev.offlineLogged) {
-                this.log.warn(`${dev.id || dev.ip} at ${dev.ip} does not answer: ${err && err.message}`);
+                this.log.warn(`${dev.id || dev.ip} at ${dev.ip} does not answer correctly: ${err && err.message}`);
                 dev.offlineLogged = true;
             }
             await this.markOnline(dev, false);
@@ -793,6 +801,10 @@ class MillLocal extends utils.Adapter {
             await this.setStateAsync(id, { val: sent, ack: true });
             this.log.info(`${dev.id}: ${sub} set to ${JSON.stringify(sent)}`);
         } catch (err) {
+            if (this.unloading) {
+                this.log.debug(`${dev.id}: ${sub} not sent, the adapter is stopping`);
+                return;
+            }
             this.log.warn(`${dev.id}: ${sub} = ${JSON.stringify(state.val)} rejected: ${err && err.message}`);
             // show the real value again
             dev.forceIds.add(sub);
@@ -879,6 +891,8 @@ class MillLocal extends utils.Adapter {
                     this.clearTimeout(d.timer);
                     d.timer = null;
                 }
+                // abort the running request, queued ones (also commands) are never sent
+                d.client.close();
             }
             this.setState('info.connection', false, true).catch(() => {});
             callback();
