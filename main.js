@@ -420,6 +420,11 @@ class MillLocal extends utils.Adapter {
             'status.switchedOn',
             mode === commands.SWITCH_MODE ? signal > 0 : !!mode && mode !== 'Off',
         );
+        // active target: null (not 0) while off or in "Switch"
+        await this.setStateChangedAsync(`${dev.id}.status.activeTargetTemperature`, {
+            val: model.activeTargetTemperature(c.set_temperature, mode),
+            ack: true,
+        });
         await this.setVal(dev, 'status.openWindowActive', ow.active);
         await this.setVal(dev, 'status.cloudConnected', !!c.connected_to_cloud);
         await this.setVal(dev, 'info.lastUpdate', now);

@@ -57,4 +57,17 @@ describe('model', () => {
         // even a range beyond the timer limit never yields a longer delay
         assert.strictEqual(m.intervalMs(1e12, 30, 10, 1e12), m.MAX_TIMER_MS);
     });
+
+    it('reports the active target temperature, never 0 while off', () => {
+        assert.strictEqual(m.activeTargetTemperature(17, 'Control individually'), 17);
+        assert.strictEqual(m.activeTargetTemperature(21.5000001, 'Weekly program'), 21.5);
+        assert.strictEqual(m.activeTargetTemperature(19, 'Independent device'), 19);
+        assert.strictEqual(m.activeTargetTemperature(0, 'Off'), null);
+        assert.strictEqual(m.activeTargetTemperature(17, 'Off'), null);
+        assert.strictEqual(m.activeTargetTemperature(99, 'Switch'), null);
+        assert.strictEqual(m.activeTargetTemperature(0, 'Switch'), null);
+        assert.strictEqual(m.activeTargetTemperature(0, 'Control individually'), null);
+        assert.strictEqual(m.activeTargetTemperature(undefined, 'Control individually'), null);
+        assert.strictEqual(m.activeTargetTemperature(17, ''), null);
+    });
 });
