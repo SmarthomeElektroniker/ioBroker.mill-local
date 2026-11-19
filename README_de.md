@@ -12,9 +12,22 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
   Einstellungen, die die API ändern kann) zeigen den Gerätewert und sind direkt beschreibbar.
 - **Steuerung ist ab Werk ein**; ausgeschaltet sind `control.*` und `settings.*` nur lesbar (mit Nur-Lese-Rollen),
   `control.restart` entfällt.
-- **EIN schaltet immer ein** – manueller Modus `Switch`, Relais an, unabhängig von Thermostat, Wochenprogramm
-  und Sollwert. **AUS schaltet immer aus** (in `Switch` öffnet das Relais, sonst Betriebsart `Off`). Für Heizen
-  nach Thermostat eine Betriebsart wie `Control individually` wählen.
+- **Ein/Aus wie beim Thermostat:** `control.power` EIN kehrt in die letzte Thermostat-Betriebsart zurück
+  (sonst `Control individually`), AUS setzt die Betriebsart `Off` – wie der Umschalter auf der Gerätekarte und so,
+  wie Material, Alexa oder Lovelace ihn neben der Solltemperatur verstehen. **Dauerheizen ohne Thermostat nur in
+  der Betriebsart `Switch`**: dort schließt/öffnet `control.power` das Relais. Ob das Relais gerade zu ist, zeigt
+  `status.heating` (bis 0.3.x war das der Lesewert von `control.power`, und EIN schaltete auf Dauerheizen).
+- **Neu in 0.4.0:** `status.activeTargetTemperature` (aktiver Sollwert, z. B. aus dem Wochenprogramm; leer statt 0,
+  solange aus), `status.lockActive` (aktive Sperre), `status.heating`.
+- **Verbindung und Abfrage:** Erreichbar heißt, das Gerät hat die letzte Abfrage gültig beantwortet. Eine
+  fehlgeschlagene Abfrage (keine/ungültige/leere Antwort, Zeitüberschreitung, HTTP-Fehler) ändert keinen Wert;
+  nach drei Fehlschlägen in Folge ist das Gerät offline (`<mac>.info.online`). `info.connection` ist `true`,
+  solange **mindestens ein** Gerät erreichbar ist. Befehle warten hinter einer laufenden Abfrage; beim Beenden
+  wird die laufende Anfrage abgebrochen und Wartendes nicht mehr gesendet. Unsinnige Intervalle in der
+  Konfiguration werden mit Warnung im Log korrigiert.
+- **PV-Überschuss:** Ölradiatoren über `settings.oilHeaterPower` (40/60/100 %), Panelheizungen über
+  `settings.limitedHeatingPower` (10–100 %), alle Geräte über `control.power` bzw. die Betriebsart `Switch`. Nur bei
+  Änderung schreiben.
 - **Uhrzeit:** Das Gerät holt sie nur per NTP von `pool.ntp.org` – und nur, wenn vorher ein Ping an `4.2.2.1`
   beantwortet wird (fest eingebaut; ohne Gateway nimmt es x.x.x.1 an). Rein lokal: Gateway per DHCP, Firewall
   erlaubt nur ICMP vom Gerät an `4.2.2.1`, `pool.ntp.org` per DNS auf einen lokalen NTP-Server lenken. Die
@@ -27,7 +40,8 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
 - **Geräteverwaltung (Reiter „Geräte“ im Admin):** je Gerät eine Karte für den laufenden Betrieb – Erreichbarkeit,
   Modell, Störungsmeldung, Anzeige „Fenster offen“, Raumtemperatur, Feuchte, Betriebsart, Solltemperatur,
   Heizleistung (W) und geschätzte Energie heute. Ein/Aus ist ein Umschalter in der Statuszeile mit Rückfrage
-  (folgt dem neuen Datenpunkt `status.switchedOn`; „Ein“ kehrt in die zuletzt aktive Betriebsart zurück).
+  (folgt dem Datenpunkt `status.switchedOn`; „Ein“ kehrt in die letzte Thermostat-Betriebsart zurück, in `Switch`
+  schaltet er das Relais).
   Betriebsart und Solltemperatur sind auch im ausgeschalteten Zustand bedienbar, eine Betriebsart außer „Aus“
   schaltet ein (alles nur bei eingeschalteter Steuerung). Bewusst keine Konfiguration auf den Karten – Geräte
   werden weiter in den Instanzeinstellungen eingetragen.

@@ -706,9 +706,13 @@ class MillLocal extends utils.Adapter {
         return p.length === 4 ? `${p[0]}.${p[1]}.${p[2]}.0/24` : '';
     }
 
+    /**
+     * info.connection = at least one device is reachable (the instance works); which device is offline
+     * shows <mac>.info.online.
+     */
     async updateConnection() {
-        const all = this.devices.length > 0 && this.devices.every(d => d.online);
-        await this.setState('info.connection', all, true);
+        const any = this.devices.some(d => d.online);
+        await this.setState('info.connection', any, true);
     }
 
     /**

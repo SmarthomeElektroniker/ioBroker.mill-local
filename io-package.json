@@ -173,17 +173,17 @@
       "common": {
         "role": "indicator.connected",
         "name": {
-          "en": "All devices reachable",
-          "de": "Alle Geräte erreichbar",
-          "ru": "Все устройства доступны",
-          "pt": "Todos os dispositivos acessíveis",
-          "nl": "Alle apparaten bereikbaar",
-          "fr": "Tous les appareils joignables",
-          "it": "Tutti i dispositivi raggiungibili",
-          "es": "Todos los dispositivos accesibles",
-          "pl": "Wszystkie urządzenia osiągalne",
-          "uk": "Усі пристрої доступні",
-          "zh-cn": "所有设备均可访问"
+          "en": "At least one device reachable",
+          "de": "Mindestens ein Gerät erreichbar",
+          "ru": "Доступно хотя бы одно устройство",
+          "pt": "Pelo menos um dispositivo acessível",
+          "nl": "Minstens één apparaat bereikbaar",
+          "fr": "Au moins un appareil joignable",
+          "it": "Almeno un dispositivo raggiungibile",
+          "es": "Al menos un dispositivo accesible",
+          "pl": "Co najmniej jedno urządzenie osiągalne",
+          "uk": "Доступний принаймні один пристрій",
+          "zh-cn": "至少一台设备可访问"
         },
         "type": "boolean",
         "read": true,

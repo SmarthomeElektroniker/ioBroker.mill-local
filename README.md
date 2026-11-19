@@ -26,16 +26,19 @@ solutions for them).
 
 - **Every value exists exactly once.** Writable values carry the device value (ack=true) and are display and
   actuator at the same time – there is no separate read-only copy.
-- `control.*`: target temperature (Normal), operation mode (the four Mill modes plus **`Switch`**), on/off, restart
-- **ON always switches on, OFF always switches off** (see below)
+- `control.*`: target temperature (Normal), operation mode (the four Mill modes plus **`Switch`**), on/off of the
+  thermostat, restart
+- **On/off like a thermostat** (see below): ON returns to the last thermostat mode, OFF always switches off;
+  permanent heating without thermostat only in the operation mode `Switch`
 - `settings.*` (writable): calibration offset, child lock, commercial lock, display unit, predictive heating,
   cloud communication (after a restart of the device), hysteresis above/below target, Comfort/Sleep/Away
   temperatures, open window detection and its five parameters, oil heater power level, panel power limit,
   additional socket mode, time zone offset, controller type (PID only for panel heaters), commercial lock
   limits, PID parameters (panel heaters), **weekly program, one-off timers and vacation** (readable JSON, see
   below); `info.customName` renames the device
-- Read-only: room temperature (calibrated and raw), humidity (sockets), heating power, control signal,
-  open window detected, cloud connection
+- Read-only: room temperature (calibrated and raw), humidity (sockets), **active target temperature** (the value the
+  device regulates to right now, e.g. of the running weekly program period), heating power, control signal,
+  heating now (relay), **active lock**, open window detected, cloud connection
 - Estimated energy (`energy.total/today/yesterday`, kWh) from the power readings
 - **Control is on by default**; switched off, `control.*` and `settings.*` become read-only (with read-only
   roles) and `control.restart` is not created
@@ -50,7 +53,9 @@ solutions for them).
    **Search devices**, then save. The MAC address is filled in by the search; with it the adapter can find
    a device again after an address change.
 2. **Polling** – status every 30 s (temperature, power, mode), settings every 600 s, request timeout 5 s.
-   The devices cannot push changes; a device counts as offline after three failed polls in a row.
+   Values outside the limits (10–3600 s, 60–86400 s, 1–30 s) are corrected with a **warning in the log** that
+   names the value used; so is a timeout that is not shorter than the polling interval. See
+   *Connection and polling* below.
 3. **Control** – enabled by default. Unticking *Enable control* makes `control.*` and `settings.*`
    read-only. The optional API key is stored encrypted and used for every device row with *API key* ticked.
 
@@ -60,7 +65,27 @@ Each device is created as `mill-local.0.<mac>` (12 hex digits) with the channels
 `control`, `settings` and `energy`. `<device>.refresh` reads a device immediately. States of older versions
 that are no longer part of the model (e.g. `status.operationMode` next to `control.operationMode`) are removed
 on start.
-`info.connection` is `true` when all configured devices are reachable.
+`info.connection` is `true` while **at least one** configured device is reachable (see below).
+
+### Connection and polling
+
+- **Reachable** means: the device answered the last poll with valid data. A poll is `GET /control-status` and
+  `GET /set-temperature` (Normal); every *settings interval* the settings are read as well. Requests to one
+  device are sent **one after the other** (the device handles one request at a time); several devices are polled
+  independently and with a staggered start.
+- A request fails on: no connection, no answer within the timeout (also a device that accepts the connection and
+  never answers, or trickles data), HTTP error, an answer that is not JSON or empty, an answer with a `status`
+  other than `ok`, or a `control-status` without operation mode and temperature. A failed poll **changes no value**
+  – all states keep their last valid value (with ack) and timestamp.
+- After **three failed polls in a row** the device counts as offline: `<mac>.info.online = false`, a warning in
+  the log (once, with the reason) and, if enabled, the search for its MAC in the network (at most every 30 min).
+  The first valid answer sets it online again (info in the log).
+- **`info.connection`** is `true` while at least one configured device is reachable, `false` when none is (or
+  no device is configured). Which device is offline shows `<mac>.info.online` (also on the device card).
+- **Commands** are queued behind a running poll and sent right after it; readings that started before a command
+  never overwrite its result, the device is read again immediately afterwards. When the instance stops, the
+  running request is aborted and queued commands are **not** sent.
+- The devices cannot push changes: a change at the device (buttons, app) appears with the next poll.
 
 ## Device manager
 
@@ -69,10 +94,11 @@ card for the **running operation** only: name and model, reachability, the fault
 warning, an *open window detected* indicator, room temperature, humidity (sockets), operation mode, target
 temperature, heating power (W) and the estimated energy of today. All values are on the card itself.
 
-- **On/off** is a toggle in the status line; its symbol and text follow the new state
+- **On/off** is a toggle in the status line; its symbol and text follow the state
   `status.switchedOn` (off = operation mode *Off*, or *Switch* with the relay open). A click asks for
-  confirmation. *Off* writes `control.power = false`; *on* returns to the last active operation mode
-  (a thermostat mode, or *Switch* with the relay closed) – never permanent heating from a thermostat mode.
+  confirmation. It does the same as `control.power`: *off* switches off, *on* returns to the last thermostat
+  mode (default *Control individually*); in the mode *Switch* it opens and closes the relay. Never permanent
+  heating from *Off* or from a thermostat mode.
 - **Operation mode** (select) and **target temperature** (slider, sent once it rests for 1 s) stay usable
   while the heater is off; choosing a mode other than *Off* switches it on.
 
@@ -93,15 +119,25 @@ name and address only. After adding devices or enabling control, reload the devi
   `set-temperature-in-independent-mode-now`; the adapter sends it automatically.
 - `POST /open-window` and `POST /hysteresis-parameters` need the complete parameter set; the adapter reads the
   current values first and only changes the one that was written.
-- **On/off:** `control.power` shows whether the output is switched on (relay closed). **ON always switches
-  on** and puts the device into the manual mode **`Switch`**: relay closed, regardless of thermostat, weekly
-  program and target temperature (none of the Mill modes does that by itself – `Control individually` and
-  `Independent device` both regulate to a target temperature). **OFF always switches off**: in `Switch` the relay
-  opens, in every other mode the device goes to `Off`. To heat by thermostat again, choose an operation mode
-  such as `Control individually`. `Switch` = `Independent device` with the relay forced via
-  `set-temperature-in-independent-mode-now` 99 (on) / 0 (off) – verified on a Wi-Fi Socket Gen 3.
-  `current_power` is 0 W when nothing is plugged into a socket, and `switched_on` stayed `false` while the relay
-  was closed; the adapter therefore uses the control signal.
+- **On/off:** `control.power` (role `switch.power`) is the on/off of the **thermostat**, as visualisations
+  (Material, Alexa, Lovelace …) expect it next to the target temperature, and the same as the toggle on the device
+  card. **ON** returns to the last thermostat mode (`Control individually`, `Weekly program` or `Independent
+  device`; default `Control individually`) – in a thermostat mode nothing is sent. **OFF** sets the operation mode
+  `Off`. Read: `true` = switched on (same as `status.switchedOn`). Whether the relay is closed right now is
+  `status.heating`.
+- **Permanent heating without thermostat only in the operation mode `Switch`** (an adapter mode): written to
+  `control.operationMode`, it starts with the relay open; in this mode `control.power` closes (ON) and opens (OFF)
+  the relay, regardless of weekly program and target temperature. `Switch` = `Independent device` with the relay
+  forced via `set-temperature-in-independent-mode-now` 99 (on) / 0 (off) – verified on a Wi-Fi Socket Gen 3. To
+  heat by thermostat again, choose a thermostat mode. `current_power` is 0 W when nothing is plugged into a
+  socket, and `switched_on` stayed `false` while the relay was closed; the adapter therefore uses the control
+  signal.
+- **Until 0.3.x** `control.power = true` switched to `Switch` with the relay closed (permanent heating) and the
+  read value was the relay. Scripts that used `control.power` as "heating now" read `status.heating` instead.
+- **Type detector:** the device (and its `control` channel) is detected as one thermostat: setpoint
+  `control.targetTemperature`, actual temperature `sensor.temperature`, humidity, on/off `control.power`. The
+  preset temperatures of `settings.*`, the raw temperature and the active target therefore use the roles
+  `level` / `value` (with unit °C).
 - **Time, weekly program, timers, vacation:** the device has no battery-backed clock and no API to set the time.
   After every start it asks **`pool.ntp.org`** via NTP (observed in the DNS log; with cloud communication off it
   queries nothing else). **Before that it checks the internet connection with an ICMP ping to `4.2.2.1`** (built
@@ -135,6 +171,21 @@ name and address only. After adding devices or enabling control, reload the devi
   key itself – removing one requires a factory reset. Devices with an API key are not found by the search.
 - Energy values are an **estimate** (power × time between two polls); gaps are not counted.
 - ioBroker in Docker: works in a bridge network, the adapter only opens outgoing HTTP connections.
+
+## PV surplus
+
+Mill heaters are a simple load for surplus control (e.g. with a script):
+
+- **Oil heaters:** `settings.oilHeaterPower` sets the power level (40, 60 or 100 % of the nominal power; 0 is also
+  accepted by the API). Raise it with surplus, lower it without. The device keeps regulating to the target
+  temperature – the level only limits the power.
+- **Panel heaters:** `settings.limitedHeatingPower` limits the power in 1 % steps (10–100 %); the same principle
+  with a finer granularity.
+- **Wi-Fi Socket and every other device:** switch the thermostat on and off with `control.power` (keeps the target
+  temperature), or use the operation mode `Switch` for a plain load: `control.power` then closes and opens the
+  relay without thermostat.
+- Write such values only when they change, not on every surplus calculation (the device answers one request at a
+  time; every command is followed by a read). Check the result in `status.power` (W) and the estimated energy.
 
 ## Migration from ioBroker.millheater
 
