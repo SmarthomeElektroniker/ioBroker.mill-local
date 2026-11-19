@@ -241,6 +241,10 @@ account or the cloud.
 - Behaviour cross-checked with the Home Assistant integration
   [`mill`](https://github.com/home-assistant/core/tree/dev/homeassistant/components/mill) (Apache-2.0) and
   [pyMillLocal](https://github.com/Danielhiversen/pyMillLocal) (MIT). No code was copied.
+- Ideas and test scenarios from [ioBroker.millheater](https://github.com/webbummler/ioBroker.millheater) by
+  webbummler (MIT): active target temperature, active lock, the description of connection and polling, the PV
+  surplus notes and the failure scenarios of the tests (invalid answers, timeout, write during a poll, shutdown
+  with a request on the wire). The tests were written anew for this adapter; no code was copied.
 
 ## Changelog
 

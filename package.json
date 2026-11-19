@@ -6,6 +6,12 @@
     "name": "Immanuel",
     "email": "github@freitag.online"
   },
+  "contributors": [
+    {
+      "name": "webbummler",
+      "url": "https://github.com/webbummler"
+    }
+  ],
   "homepage": "https://github.com/SmarthomeElektroniker/ioBroker.mill-local",
   "license": "MIT",
   "keywords": [
