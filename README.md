@@ -138,13 +138,13 @@ name and address only. After adding devices or enabling control, reload the devi
 
 ## Difference to ioBroker.millheater
 
-[ioBroker.millheater](https://github.com/webbummler/ioBroker.millheater) also uses the local API, but with a
-different scope: one heater per instance (IP address or host name), oil and panel heaters, focused on target
-temperature, operation mode and power level (e.g. for PV surplus control). **mill-local** covers all
-Generation 3 devices with the local API including the **Wi-Fi Socket** (humidity, socket mode) and convection
-heaters, **several devices per instance** with network search and re-discovery by MAC address, **every setting the
-local API can change** (locks, hysteresis, open window, preset temperatures, weekly program, timers, vacation,
-time zone, PID …), a plain on/off mode without thermostat and an energy estimate. Neither adapter needs a Mill
+[ioBroker.millheater](https://github.com/webbummler/ioBroker.millheater) also uses the local API and supports
+the same Generation 3 device kinds (convection, oil and panel heaters, Wi-Fi Socket). It runs one device per
+instance and focuses on target temperature, operation mode, calibration and power level (e.g. for PV surplus
+control), with thorough tests and documentation. **mill-local** runs **several devices per instance** with network
+search and re-discovery by MAC address, covers **every setting the local API can change** (locks, hysteresis, open
+window, preset temperatures, weekly program, timers, vacation, time zone, PID …), humidity of the Wi-Fi Socket,
+a plain on/off mode without thermostat, an energy estimate and device manager cards. Neither adapter needs a Mill
 account or the cloud.
 
 ## Sources

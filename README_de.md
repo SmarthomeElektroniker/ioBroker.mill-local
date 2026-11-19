@@ -32,6 +32,7 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
   schaltet ein (alles nur bei eingeschalteter Steuerung). Bewusst keine Konfiguration auf den Karten – Geräte
   werden weiter in den Instanzeinstellungen eingetragen.
 - Die Energiewerte sind geschätzt (Leistung × Zeit zwischen zwei Abfragen).
-- **Unterschied zu `millheater`:** Jener Adapter nutzt ebenfalls die lokale API, aber ein Gerät je Instanz (Öl-
-  und Panelheizungen, Soll/Betriebsart/Leistungsstufe). `mill-local` kann mehrere Geräte je Instanz samt Suche,
-  alle Gen-3-Geräte einschließlich WLAN-Steckdose und alle über die API änderbaren Einstellungen.
+- **Unterschied zu `millheater`:** Jener Adapter nutzt ebenfalls die lokale API und unterstützt dieselben Gen-3-
+  Gerätearten (Konvektor, Öl, Panel, WLAN-Steckdose), mit einem Gerät je Instanz und Schwerpunkt auf Sollwert,
+  Betriebsart, Kalibrierung und Leistungsstufe. `mill-local` kann mehrere Geräte je Instanz samt Suche, alle über
+  die API änderbaren Einstellungen, Luftfeuchte der Steckdose, Energieschätzung und Gerätekarten.
