@@ -12,6 +12,7 @@ const { CHANNELS, definitionsFor } = require('./lib/states');
 const commands = require('./lib/commands');
 const { EnergyCounter, dayKey } = require('./lib/energy');
 const discovery = require('./lib/discovery');
+const { checkTiming } = require('./lib/config');
 const schedule = require('./lib/schedule');
 const { MillDeviceManagement } = require('./lib/deviceManagement');
 
@@ -105,10 +106,15 @@ class MillLocal extends utils.Adapter {
     async onReady() {
         await this.setState('info.connection', false, true);
         const cfg = this.config;
-        // same limits as the admin UI, enforced here as well (the instance object can be edited directly)
-        this.pollMs = model.intervalMs(cfg.pollInterval, 30, 10, 3600);
-        this.slowEvery = Math.max(1, Math.round(model.intervalMs(cfg.slowInterval, 600, 60, 86400) / this.pollMs));
-        this.timeoutMs = model.intervalMs(cfg.timeout, 5, 1, 30);
+        // same limits as the admin UI, enforced here as well (the instance object can be edited directly);
+        // a corrected value is reported, not silently clamped
+        const timing = checkTiming(cfg);
+        for (const w of timing.warnings) {
+            this.log.warn(`Configuration: ${w}`);
+        }
+        this.pollMs = timing.pollMs;
+        this.slowEvery = Math.max(1, Math.round(timing.slowMs / this.pollMs));
+        this.timeoutMs = timing.timeoutMs;
         this.allowControl = cfg.allowControl !== false;
 
         const rows = Array.isArray(cfg.devices) ? cfg.devices : [];
@@ -123,6 +129,11 @@ class MillLocal extends utils.Adapter {
                 continue;
             }
             seen.add(key);
+            if (String(row.mac || '').trim() && !model.macId(row.mac)) {
+                this.log.warn(
+                    `Configuration: MAC "${row.mac}" of ${key} is not a valid MAC address - ignored, the device is identified by its address only`,
+                );
+            }
             this.devices.push(new Device(row, cfg.apiKey || '', this.timeoutMs, this.timerApi));
         }
 
