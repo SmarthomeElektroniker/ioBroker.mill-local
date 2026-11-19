@@ -58,6 +58,8 @@ tests.integration(path.join(__dirname, '..'), {
                 await waitFor('mill-local.0.info.connection', v => v === true);
                 await waitFor(`${dev}.settings.temperatureComfort`, v => v === 22);
                 await waitFor(`${dev}.settings.calibrationOffset`, v => v === -1.5);
+                await waitFor(`${dev}.status.lockActive`, v => v === 'No lock');
+                await waitFor(`${dev}.status.activeTargetTemperature`, v => v === 20);
                 assert.ok(!(await harness.objects.getObjectAsync(`${dev}.settings.oilHeaterPower`)), 'socket has no oil power');
                 assert.ok(!(await harness.objects.getObjectAsync(`${dev}.status.operationMode`)), 'duplicate removed');
                 const cal = await harness.objects.getObjectAsync(`${dev}.settings.calibrationOffset`);

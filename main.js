@@ -425,6 +425,9 @@ class MillLocal extends utils.Adapter {
             val: model.activeTargetTemperature(c.set_temperature, mode),
             ack: true,
         });
+        if (typeof c.lock_active === 'string') {
+            await this.setVal(dev, 'status.lockActive', c.lock_active);
+        }
         await this.setVal(dev, 'status.openWindowActive', ow.active);
         await this.setVal(dev, 'status.cloudConnected', !!c.connected_to_cloud);
         await this.setVal(dev, 'info.lastUpdate', now);
