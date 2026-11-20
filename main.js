@@ -73,6 +73,8 @@ class Device {
         this.refreshPending = false;
         /** IDs whose state must be rewritten even if unchanged (after a failed command) */
         this.forceIds = new Set();
+        /** States written since the start (the first write is never skipped, see writeChanged) */
+        this.written = new Set();
     }
 
     /** @param {string} ip New address */
@@ -477,10 +479,11 @@ class MillLocal extends utils.Adapter {
         // relay closed = heats right now (control signal > 0), in every mode
         await this.setVal(dev, 'status.heating', signal > 0);
         // active target: null (not 0) while off or in "Switch"
-        await this.setStateChangedAsync(`${dev.id}.status.activeTargetTemperature`, {
-            val: known ? model.activeTargetTemperature(c.set_temperature, mode) : null,
-            ack: true,
-        });
+        await this.writeChanged(
+            dev,
+            'status.activeTargetTemperature',
+            known ? model.activeTargetTemperature(c.set_temperature, mode) : null,
+        );
         if (typeof c.lock_active === 'string') {
             await this.setVal(dev, 'status.lockActive', c.lock_active);
         }
@@ -488,7 +491,8 @@ class MillLocal extends utils.Adapter {
         await this.setVal(dev, 'status.cloudConnected', !!c.connected_to_cloud);
         await this.setVal(dev, 'info.lastUpdate', now);
 
-        if (dev.energy && dev.energy.add(power, now)) {
+        // (also once after the start, so the counters never keep the default of their object)
+        if (dev.energy && (dev.energy.add(power, now) || !dev.written.has('energy.total'))) {
             await this.setVal(dev, 'energy.total', model.round(dev.energy.totalKwh, 4));
             await this.setVal(dev, 'energy.today', model.round(dev.energy.todayKwh, 4));
             await this.setVal(dev, 'energy.yesterday', model.round(dev.energy.yesterdayKwh, 4));
@@ -769,6 +773,24 @@ class MillLocal extends utils.Adapter {
         if (val === null || val === undefined) {
             return;
         }
+        await this.writeChanged(dev, id, val);
+    }
+
+    /**
+     * setStateChanged, but the first write of a state after the start is always made: a state that only holds
+     * the default of its object (quality 0x20 "substitute value") would otherwise keep it while the device
+     * reports the same value.
+     *
+     * @param {Device} dev Device
+     * @param {string} id Relative ID
+     * @param {unknown} val Value
+     */
+    async writeChanged(dev, id, val) {
+        if (!dev.written.has(id)) {
+            dev.written.add(id);
+            await this.setStateAsync(`${dev.id}.${id}`, { val, ack: true });
+            return;
+        }
         await this.setStateChangedAsync(`${dev.id}.${id}`, { val, ack: true });
     }
 
@@ -789,7 +811,7 @@ class MillLocal extends utils.Adapter {
             await this.setStateAsync(`${dev.id}.${id}`, { val, ack: true });
             return;
         }
-        await this.setStateChangedAsync(`${dev.id}.${id}`, { val, ack: true });
+        await this.writeChanged(dev, id, val);
     }
 
     /**
