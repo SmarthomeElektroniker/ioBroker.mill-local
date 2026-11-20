@@ -43,8 +43,15 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
   (folgt dem Datenpunkt `status.switchedOn`; „Ein“ kehrt in die letzte Thermostat-Betriebsart zurück, in `Switch`
   schaltet er das Relais).
   Betriebsart und Solltemperatur sind auch im ausgeschalteten Zustand bedienbar, eine Betriebsart außer „Aus“
-  schaltet ein (alles nur bei eingeschalteter Steuerung). Bewusst keine Konfiguration auf den Karten – Geräte
-  werden weiter in den Instanzeinstellungen eingetragen.
+  schaltet ein (alles nur bei eingeschalteter Steuerung). **Wochenprogramm** (Kalender-Knopf): Dialog mit den
+  Schaltpunkten (Tag, Uhrzeit, Abschnitt Komfort/Schlafen/Abwesend/Normal/Aus/Dauerheizen) und den aktuellen
+  Temperaturen; auf Wunsch wird gleich die Betriebsart „Wochenprogramm“ gesetzt. Bewusst keine Konfiguration auf
+  den Karten – Geräte werden weiter in den Instanzeinstellungen eingetragen.
+- Eine unbekannte gemeldete Betriebsart (die API-Beschreibung nennt `Invalid`) wird angezeigt, zählt als aus und
+  wird einmal gewarnt; gesendet wird sie nie.
+- **Tests ohne Gerät:** `test/fakeMill.js` simuliert Steckdose, Panel-, Öl- und Konvektionsheizung samt
+  Wochenprogramm, Timern, Urlaub, Geräteuhr, Fenster offen, Kindersicherung und Verbindungsabbrüchen;
+  `node test/simulator.js` startet vier simulierte Geräte für eine Probe-Instanz (siehe englische README).
 - Die Energiewerte sind geschätzt (Leistung × Zeit zwischen zwei Abfragen).
 - **Unterschied zu `millheater`:** Jener Adapter nutzt ebenfalls die lokale API und unterstützt dieselben Gen-3-
   Gerätearten (Konvektor, Öl, Panel, WLAN-Steckdose), mit einem Gerät je Instanz und Schwerpunkt auf Sollwert,

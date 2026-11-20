@@ -1,20 +1,20 @@
 {
   "common": {
     "name": "mill-local",
-    "version": "0.4.0-alpha.0",
+    "version": "0.4.0-alpha.1",
     "news": {
-      "0.4.0-alpha.0": {
-        "en": "control.power is now the on/off of the thermostat (ON = last thermostat mode, permanent heating only in the mode Switch, relay in the new status.heating); new states status.activeTargetTemperature and status.lockActive; info.connection = at least one device reachable; warnings for invalid settings; takeover from millheater. Ideas and test scenarios from ioBroker.millheater by webbummler, MIT.",
-        "de": "control.power ist jetzt Ein/Aus des Thermostats (EIN = letzte Thermostat-Betriebsart, Dauerheizen nur in der Betriebsart Switch, Relais im neuen status.heating); neue Datenpunkte status.activeTargetTemperature und status.lockActive; info.connection = mindestens ein Gerät erreichbar; Warnungen bei unsinnigen Einstellungen; Übernahme aus millheater. Ideen und Testszenarien aus ioBroker.millheater von webbummler, MIT.",
-        "ru": "control.power теперь включает/выключает термостат (ВКЛ = последний режим термостата, постоянный нагрев только в режиме Switch, реле в новом status.heating); новые состояния status.activeTargetTemperature и status.lockActive; info.connection = доступно хотя бы одно устройство; предупреждения о недопустимых настройках; перенос из millheater. Идеи и тестовые сценарии из ioBroker.millheater от webbummler, MIT.",
-        "pt": "control.power é agora o ligar/desligar do termóstato (LIGAR = último modo de termóstato, aquecimento contínuo apenas no modo Switch, relé no novo status.heating); novos estados status.activeTargetTemperature e status.lockActive; info.connection = pelo menos um dispositivo acessível; avisos para definições inválidas; importação do millheater. Ideias e cenários de teste do ioBroker.millheater de webbummler, MIT.",
-        "nl": "control.power is nu aan/uit van de thermostaat (AAN = laatste thermostaatmodus, continu verwarmen alleen in de modus Switch, relais in de nieuwe status.heating); nieuwe statussen status.activeTargetTemperature en status.lockActive; info.connection = minstens één apparaat bereikbaar; waarschuwingen bij ongeldige instellingen; overname uit millheater. Ideeën en testscenario’s uit ioBroker.millheater van webbummler, MIT.",
-        "fr": "control.power est désormais la marche/arrêt du thermostat (MARCHE = dernier mode thermostat, chauffe permanente uniquement en mode Switch, relais dans le nouvel état status.heating) ; nouveaux états status.activeTargetTemperature et status.lockActive ; info.connection = au moins un appareil joignable ; avertissements pour les réglages invalides ; reprise depuis millheater. Idées et scénarios de test issus de ioBroker.millheater de webbummler, MIT.",
-        "it": "control.power è ora l’accensione/spegnimento del termostato (ACCESO = ultima modalità termostato, riscaldamento continuo solo nella modalità Switch, relè nel nuovo status.heating); nuovi stati status.activeTargetTemperature e status.lockActive; info.connection = almeno un dispositivo raggiungibile; avvisi per impostazioni non valide; importazione da millheater. Idee e scenari di test da ioBroker.millheater di webbummler, MIT.",
-        "es": "control.power es ahora el encendido/apagado del termostato (ENCENDIDO = último modo de termostato, calefacción continua solo en el modo Switch, relé en el nuevo status.heating); nuevos estados status.activeTargetTemperature y status.lockActive; info.connection = al menos un dispositivo accesible; avisos para ajustes no válidos; importación desde millheater. Ideas y escenarios de prueba de ioBroker.millheater de webbummler, MIT.",
-        "pl": "control.power to teraz wł./wył. termostatu (WŁ. = ostatni tryb termostatu, ciągłe grzanie tylko w trybie Switch, przekaźnik w nowym status.heating); nowe stany status.activeTargetTemperature i status.lockActive; info.connection = co najmniej jedno urządzenie osiągalne; ostrzeżenia przy nieprawidłowych ustawieniach; przejęcie z millheater. Pomysły i scenariusze testowe z ioBroker.millheater autorstwa webbummler, MIT.",
-        "uk": "control.power тепер вмикає/вимикає термостат (УВІМК. = останній режим термостата, постійний нагрів лише в режимі Switch, реле в новому status.heating); нові стани status.activeTargetTemperature і status.lockActive; info.connection = доступний принаймні один пристрій; попередження про недопустимі налаштування; перенесення з millheater. Ідеї та тестові сценарії з ioBroker.millheater від webbummler, MIT.",
-        "zh-cn": "control.power 现在是恒温器的开/关（开 = 上次恒温模式，仅在 Switch 模式下持续加热，继电器状态见新的 status.heating）；新增状态 status.activeTargetTemperature 和 status.lockActive；info.connection = 至少一台设备可访问；无效设置时发出警告；从 millheater 接管。创意和测试场景来自 webbummler 的 ioBroker.millheater，MIT 许可。"
+      "0.4.0-alpha.1": {
+        "en": "control.power is now the on/off of the thermostat (ON = last thermostat mode, permanent heating only in the mode Switch, relay in the new status.heating); new states status.activeTargetTemperature and status.lockActive; info.connection = at least one device reachable; warnings for invalid settings; takeover from millheater. Ideas and test scenarios from ioBroker.millheater by webbummler, MIT. Weekly program dialog on the device card; requires js-controller 7.",
+        "de": "control.power ist jetzt Ein/Aus des Thermostats (EIN = letzte Thermostat-Betriebsart, Dauerheizen nur in der Betriebsart Switch, Relais im neuen status.heating); neue Datenpunkte status.activeTargetTemperature und status.lockActive; info.connection = mindestens ein Gerät erreichbar; Warnungen bei unsinnigen Einstellungen; Übernahme aus millheater. Ideen und Testszenarien aus ioBroker.millheater von webbummler, MIT. Wochenprogramm-Dialog auf der Gerätekarte; benötigt js-controller 7.",
+        "ru": "control.power теперь включает/выключает термостат (ВКЛ = последний режим термостата, постоянный нагрев только в режиме Switch, реле в новом status.heating); новые состояния status.activeTargetTemperature и status.lockActive; info.connection = доступно хотя бы одно устройство; предупреждения о недопустимых настройках; перенос из millheater. Идеи и тестовые сценарии из ioBroker.millheater от webbummler, MIT. Диалог недельной программы на карточке устройства; требуется js-controller 7.",
+        "pt": "control.power é agora o ligar/desligar do termóstato (LIGAR = último modo de termóstato, aquecimento contínuo apenas no modo Switch, relé no novo status.heating); novos estados status.activeTargetTemperature e status.lockActive; info.connection = pelo menos um dispositivo acessível; avisos para definições inválidas; importação do millheater. Ideias e cenários de teste do ioBroker.millheater de webbummler, MIT. Diálogo do programa semanal no cartão do dispositivo; requer js-controller 7.",
+        "nl": "control.power is nu aan/uit van de thermostaat (AAN = laatste thermostaatmodus, continu verwarmen alleen in de modus Switch, relais in de nieuwe status.heating); nieuwe statussen status.activeTargetTemperature en status.lockActive; info.connection = minstens één apparaat bereikbaar; waarschuwingen bij ongeldige instellingen; overname uit millheater. Ideeën en testscenario’s uit ioBroker.millheater van webbummler, MIT. Dialoog voor het weekprogramma op de apparaatkaart; vereist js-controller 7.",
+        "fr": "control.power est désormais la marche/arrêt du thermostat (MARCHE = dernier mode thermostat, chauffe permanente uniquement en mode Switch, relais dans le nouvel état status.heating) ; nouveaux états status.activeTargetTemperature et status.lockActive ; info.connection = au moins un appareil joignable ; avertissements pour les réglages invalides ; reprise depuis millheater. Idées et scénarios de test issus de ioBroker.millheater de webbummler, MIT. Dialogue du programme hebdomadaire sur la carte de l'appareil ; nécessite js-controller 7.",
+        "it": "control.power è ora l’accensione/spegnimento del termostato (ACCESO = ultima modalità termostato, riscaldamento continuo solo nella modalità Switch, relè nel nuovo status.heating); nuovi stati status.activeTargetTemperature e status.lockActive; info.connection = almeno un dispositivo raggiungibile; avvisi per impostazioni non valide; importazione da millheater. Idee e scenari di test da ioBroker.millheater di webbummler, MIT. Finestra del programma settimanale sulla scheda del dispositivo; richiede js-controller 7.",
+        "es": "control.power es ahora el encendido/apagado del termostato (ENCENDIDO = último modo de termostato, calefacción continua solo en el modo Switch, relé en el nuevo status.heating); nuevos estados status.activeTargetTemperature y status.lockActive; info.connection = al menos un dispositivo accesible; avisos para ajustes no válidos; importación desde millheater. Ideas y escenarios de prueba de ioBroker.millheater de webbummler, MIT. Diálogo del programa semanal en la tarjeta del dispositivo; requiere js-controller 7.",
+        "pl": "control.power to teraz wł./wył. termostatu (WŁ. = ostatni tryb termostatu, ciągłe grzanie tylko w trybie Switch, przekaźnik w nowym status.heating); nowe stany status.activeTargetTemperature i status.lockActive; info.connection = co najmniej jedno urządzenie osiągalne; ostrzeżenia przy nieprawidłowych ustawieniach; przejęcie z millheater. Pomysły i scenariusze testowe z ioBroker.millheater autorstwa webbummler, MIT. Okno programu tygodniowego na karcie urządzenia; wymaga js-controller 7.",
+        "uk": "control.power тепер вмикає/вимикає термостат (УВІМК. = останній режим термостата, постійний нагрів лише в режимі Switch, реле в новому status.heating); нові стани status.activeTargetTemperature і status.lockActive; info.connection = доступний принаймні один пристрій; попередження про недопустимі налаштування; перенесення з millheater. Ідеї та тестові сценарії з ioBroker.millheater від webbummler, MIT. Діалог тижневої програми на картці пристрою; потрібен js-controller 7.",
+        "zh-cn": "control.power 现在是恒温器的开/关（开 = 上次恒温模式，仅在 Switch 模式下持续加热，继电器状态见新的 status.heating）；新增状态 status.activeTargetTemperature 和 status.lockActive；info.connection = 至少一台设备可访问；无效设置时发出警告；从 millheater 接管。创意和测试场景来自 webbummler 的 ioBroker.millheater，MIT 许可。 设备卡片上的每周计划对话框；需要 js-controller 7。"
       },
       "0.3.0": {
         "en": "Device manager: one card per device for daily operation - on/off toggle with confirmation, operation mode and target temperature on the card, room temperature, humidity, heating power and energy today. New state status.switchedOn.",
@@ -132,12 +132,54 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=6.0.11"
+        "js-controller": ">=7.0.7"
       }
     ],
     "globalDependencies": [
       {
         "admin": ">=7.6.20"
+      }
+    ],
+    "messages": [
+      {
+        "condition": {
+          "operand": "and",
+          "rules": [
+            "oldVersion<0.4.0",
+            "newVersion>=0.4.0"
+          ]
+        },
+        "title": {
+          "en": "control.power changed its meaning",
+          "de": "control.power hat eine neue Bedeutung",
+          "ru": "control.power изменил значение",
+          "pt": "control.power mudou de significado",
+          "nl": "control.power heeft een nieuwe betekenis",
+          "fr": "control.power change de signification",
+          "it": "control.power ha cambiato significato",
+          "es": "control.power cambia de significado",
+          "pl": "control.power ma nowe znaczenie",
+          "uk": "control.power змінив значення",
+          "zh-cn": "control.power 的含义已改变"
+        },
+        "text": {
+          "en": "From 0.4.0 on, control.power is the on/off of the thermostat: ON returns to the last thermostat mode, OFF sets the mode Off. It no longer heats permanently - that is the operation mode \"Switch\". Scripts that read control.power as \"heating now\" must use status.heating instead.",
+          "de": "Ab 0.4.0 ist control.power das Ein/Aus des Thermostats: EIN kehrt in die letzte Thermostat-Betriebsart zurück, AUS setzt die Betriebsart Off. Dauerheizen gibt es nur noch in der Betriebsart „Switch“. Skripte, die control.power als „heizt gerade“ lesen, müssen status.heating verwenden.",
+          "ru": "Начиная с 0.4.0 control.power — это вкл/выкл термостата: ВКЛ возвращает последний режим термостата, ВЫКЛ устанавливает режим Off. Постоянный нагрев теперь только в режиме «Switch». Скрипты, которые читают control.power как «греет сейчас», должны использовать status.heating.",
+          "pt": "A partir da 0.4.0, control.power é o ligar/desligar do termóstato: LIGAR volta ao último modo de termóstato, DESLIGAR define o modo Off. O aquecimento permanente existe apenas no modo \"Switch\". Scripts que leem control.power como \"a aquecer agora\" devem usar status.heating.",
+          "nl": "Vanaf 0.4.0 is control.power het aan/uit van de thermostaat: AAN keert terug naar de laatste thermostaatmodus, UIT zet de modus Off. Permanent verwarmen kan alleen nog in de modus \"Switch\". Scripts die control.power als \"verwarmt nu\" lezen, moeten status.heating gebruiken.",
+          "fr": "À partir de 0.4.0, control.power est la marche/arrêt du thermostat : MARCHE revient au dernier mode thermostat, ARRÊT règle le mode Off. Le chauffage permanent n'existe plus que dans le mode « Switch ». Les scripts qui lisent control.power comme « chauffe maintenant » doivent utiliser status.heating.",
+          "it": "Dalla 0.4.0 control.power è l'acceso/spento del termostato: ACCESO torna all'ultima modalità termostato, SPENTO imposta la modalità Off. Il riscaldamento permanente esiste solo nella modalità \"Switch\". Gli script che leggono control.power come \"sta riscaldando\" devono usare status.heating.",
+          "es": "A partir de 0.4.0, control.power es el encendido/apagado del termostato: ENCENDER vuelve al último modo de termostato, APAGAR establece el modo Off. La calefacción permanente solo existe en el modo \"Switch\". Los scripts que leen control.power como \"calentando ahora\" deben usar status.heating.",
+          "pl": "Od wersji 0.4.0 control.power to włącz/wyłącz termostatu: WŁĄCZ wraca do ostatniego trybu termostatu, WYŁĄCZ ustawia tryb Off. Ciągłe grzanie jest dostępne tylko w trybie „Switch”. Skrypty, które czytają control.power jako „grzeje teraz”, muszą używać status.heating.",
+          "uk": "Починаючи з 0.4.0 control.power — це увімк./вимк. термостата: УВІМК. повертає останній режим термостата, ВИМК. встановлює режим Off. Постійне нагрівання тепер лише в режимі «Switch». Скрипти, які читають control.power як «гріє зараз», мають використовувати status.heating.",
+          "zh-cn": "从 0.4.0 起，control.power 表示恒温器的开/关：开启会回到上一次的恒温模式，关闭会设置为 Off 模式。持续加热仅在 “Switch” 模式下可用。把 control.power 当作“正在加热”读取的脚本必须改用 status.heating。"
+        },
+        "level": "warn",
+        "buttons": [
+          "agree",
+          "cancel"
+        ]
       }
     ]
   },

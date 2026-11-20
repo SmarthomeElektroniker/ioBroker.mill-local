@@ -102,6 +102,11 @@ temperature, heating power (W) and the estimated energy of today. All values are
 - **Operation mode** (select) and **target temperature** (slider, sent once it rests for 1 s) stay usable
   while the heater is off; choosing a mode other than *Off* switches it on.
 
+- **Weekly program** (calendar button): a dialog with the switching points of the device (day, time, period
+  Comfort / Sleep / Away / Normal / Off / Always heating) and the current temperatures of the periods. *Apply* writes
+  `settings.weeklyProgram`; with *Run the weekly program now* it also sets the operation mode *Weekly program*.
+  The device runs the program itself and needs the correct time (see *Time, weekly program …* below).
+
 Controls exist only while control is enabled. The card writes the existing states (ack=false), so the same
 validation applies as for scripts – only the documented operation modes are ever sent.
 
@@ -115,6 +120,13 @@ name and address only. After adding devices or enabling control, reload the devi
   The adapter therefore only sends the documented modes (`Control individually`, `Weekly program`,
   `Independent device`, `Off`). The device reports the off mode as `OFF`; the adapter shows `Off`.
 - The device handles one request at a time; the adapter queues all requests per device.
+- An operation mode the adapter does not know (the API description lists `Invalid`) is shown as reported in
+  `control.operationMode`, counts as switched off and is logged once as a warning. It is never sent;
+  `control.power` = ON returns to the last thermostat mode.
+- In `Independent device` a one-off timer of the type `Off` / `AlwaysHeating` reports the same values as `Switch`
+  with the relay open / closed (`set_temperature` 0 / 99). The adapter tells them apart with the timers it read
+  (the last timer that has passed); a timer set at the device shows up with the next settings poll. Derived from
+  the API description, not checked on a real device yet.
 - In the mode `Independent device` a new target temperature only takes effect with
   `set-temperature-in-independent-mode-now`; the adapter sends it automatically.
 - `POST /open-window` and `POST /hysteresis-parameters` need the complete parameter set; the adapter reads the
@@ -234,6 +246,18 @@ window, preset temperatures, weekly program, timers, vacation, time zone, PID �
 a plain on/off mode without thermostat, an energy estimate and device manager cards. Neither adapter needs a Mill
 account or the cloud.
 
+## Development and tests
+
+- `npm test` – package and unit tests; `npm run lint` – ESLint 9 (flat config of `@iobroker/eslint-config`).
+- `IOB_CONTROLLER=latest npm run test:integration` – starts a js-controller with the adapter against simulated
+  devices (`test/fakeMill.js`): Wi-Fi socket, panel, oil and convection heater, weekly program / timers / vacation
+  with a movable device clock and without NTP, open window, child lock, unknown operation modes, invalid answers,
+  timeouts, dropped connections, restart, the operation-mode trap and the shutdown with a request on the wire.
+- `node test/simulator.js --base 18000 --pid sim.pid` – four simulated devices (ports 18001–18004) with a room
+  that warms up while the device heats, for trying the adapter without hardware. `GET http://127.0.0.1:18000/` shows
+  them, `POST http://127.0.0.1:18000/<n>` with e.g. `{"windowOpen": true}` or `{"offline": true}` changes the
+  simulation; stop with `kill $(cat sim.pid)`. Not part of the npm package.
+
 ## Sources
 
 - Official API description: [Mill-International-AS/Generation_3_REST_API](https://github.com/Mill-International-AS/Generation_3_REST_API)
@@ -244,7 +268,9 @@ account or the cloud.
 - Ideas and test scenarios from [ioBroker.millheater](https://github.com/webbummler/ioBroker.millheater) by
   webbummler (MIT): active target temperature, active lock, the description of connection and polling, the PV
   surplus notes and the failure scenarios of the tests (invalid answers, timeout, write during a poll, shutdown
-  with a request on the wire). The tests were written anew for this adapter; no code was copied.
+  with a request on the wire), the validation of the timing values in the admin form (value ranges and the
+  rule *timeout < polling interval*, not saved while invalid) and the handling of the reported mode `Invalid`. The
+  tests were written anew for this adapter; no code was copied.
 
 ## Changelog
 
@@ -265,6 +291,16 @@ account or the cloud.
 - (Immanuel) Clear warnings for invalid timing settings; empty or invalid answers keep the last values; the
   shutdown aborts the running request and drops queued commands.
 - (Immanuel) Takeover from ioBroker.millheater (button in the instance settings), migration table in the README.
+- (Immanuel) Weekly program dialog on the device card (switching points as a table, optionally switches to the
+  operation mode *Weekly program*).
+- (Immanuel) Unknown reported operation modes (e.g. `Invalid`) count as off and are logged once.
+- (Immanuel) Admin form: timing values are checked (ranges, timeout shorter than the polling interval) and not
+  saved while invalid.
+- (Immanuel) Upgrade notice for the changed meaning of `control.power` (admin message on the update and one
+  warning per device in the log).
+- (Immanuel) Requires js-controller 7.0.7 or newer.
+- (Immanuel) Tests: simulator for Wi-Fi socket, panel, oil and convection heater with weekly program, timers,
+  vacation, device clock, open window, child lock and connection loss; `test/simulator.js` for a demo instance.
 - (Immanuel) Ideas and test scenarios from ioBroker.millheater by webbummler, MIT.
 
 ### 0.3.0 (2026-11-12)
