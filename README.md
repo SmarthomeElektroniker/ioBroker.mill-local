@@ -248,6 +248,19 @@ window, preset temperatures, weekly program, timers, vacation, time zone, PID �
 a plain on/off mode without thermostat, an energy estimate and device manager cards. Neither adapter needs a Mill
 account or the cloud.
 
+## Visualisation (vis)
+
+The adapter brings its own **vis 1 widgets** (set *mill-local*): device card, phone card, room temperature with target
+− / +, values, operation mode, weekly program (display), today's periods of several devices, total power and a
+**history chart** (room temperature, target as step line, current power as area, humidity of the Wi-Fi socket; 24 h or
+7 days). Ready-made views for overview, detail page and phone are in [`vis-templates/`](vis-templates/README.md).
+Light and dark, texts in eleven languages.
+
+The chart reads recorded values from any history adapter (`history`, `influxdb`, `sql`; attribute *History instance*,
+empty = default). **The adapter switches no recording on** – switch it on in the object tree (gear icon) for
+`sensor.temperature`, `status.activeTargetTemperature`, `status.power`, `sensor.humidity` (Wi-Fi socket) and optionally
+`control.targetTemperature` of each device.
+
 ## Development and tests
 
 - `npm test` – package and unit tests; `npm run lint` – ESLint 9 (flat config of `@iobroker/eslint-config`).
@@ -300,6 +313,9 @@ account or the cloud.
   saved while invalid.
 - (Immanuel) Upgrade notice for the changed meaning of `control.power` (admin message on the update and one
   warning per device in the log).
+- (Immanuel) vis widgets (set *mill-local*) with ready-made views (overview, detail page with weekly program and history
+  chart, phone) in `vis-templates/`; the history chart reads any history adapter and switches no recording on.
+- (Immanuel) Cards and objects: "Current power" instead of "Heating power" for `status.power`.
 - (Immanuel) Requires js-controller 7.0.7 or newer.
 - (Immanuel) Tests: simulator for Wi-Fi socket, panel, oil and convection heater with weekly program, timers,
   vacation, device clock, open window, child lock and connection loss; `test/simulator.js` for a demo instance.

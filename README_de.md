@@ -62,3 +62,10 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
   übernehmen“** Adresse, MAC, Name und Intervalle aller `millheater`-Instanzen in die Gerätetabelle. Danach speichern
   und die millheater-Instanzen anhalten (das Gerät beantwortet nur eine Anfrage gleichzeitig). Die Zuordnung
   alte ID → neue ID steht als Tabelle in der englischen README („Migration from ioBroker.millheater“).
+- **Visualisierung (vis 1):** eigene Widgets (Satz *mill-local*) – Gerätekarte, Handykarte, Raumtemperatur mit Soll
+  − / +, Werte, Betriebsart, Wochenprogramm (Anzeige), heutige Abschnitte, Gesamtleistung und ein **Verlaufsdiagramm**
+  (Raumtemperatur, Soll als Stufenlinie, aktuelle Leistung als Fläche, Luftfeuchte der Steckdose; 24 h oder 7 Tage).
+  Fertige Ansichten in [`vis-templates/`](vis-templates/README.md). Datenquelle frei wählbar (history, influxdb, sql);
+  **die Aufzeichnung schaltet der Anwender ein**, nicht der Adapter: im Objektbaum am Zahnrad für
+  `sensor.temperature`, `status.activeTargetTemperature`, `status.power`, `sensor.humidity` (Steckdose) und optional
+  `control.targetTemperature`.
