@@ -2,14 +2,17 @@
 <html>
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1"
+        />
         <title>Mill weekly program</title>
         <!--
             Week grid of the weekly program (device manager dialog of mill-local, loaded as iframe).
             One row per weekday, 0-24 h; every block is a period with its temperature (Comfort (22 °C) ...).
             The lines between the blocks are the switching times.
-            - click into a block: new switching time there (preview line with the time while hovering), then the
-              choice of the period opens
+            - click into a block (or "new switching time" in the menu): new switching time there (preview line with
+              the time while hovering); the menu closes and a small choice "type for 14:00" opens at the new line
             - drag a line: move the switching time (15-minute steps); click a line: change or delete it
             - "+ switching time" per row; copy and paste a whole day
             - keyboard: Tab to a block or line; Enter = choose the period, Insert or "+" = new switching time,
@@ -186,6 +189,19 @@
                 border-radius: 2px;
                 background: var(--block-fg);
                 opacity: 0.7;
+            }
+            .handle.new::after {
+                opacity: 1;
+                animation: pulse 0.8s ease-in-out 2;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    box-shadow: 0 0 0 0 var(--focus);
+                }
+                50% {
+                    box-shadow: 0 0 0 5px var(--focus);
+                }
             }
             .handle:hover::after,
             .handle.drag::after {
@@ -364,8 +380,14 @@
     <body>
         <div id="legend"></div>
         <div id="hint"></div>
-        <div id="grid" role="grid"></div>
-        <div id="status" aria-live="polite"></div>
+        <div
+            id="grid"
+            role="grid"
+        ></div>
+        <div
+            id="status"
+            aria-live="polite"
+        ></div>
         <script>
             'use strict';
             (function () {
@@ -417,8 +439,10 @@
                     typeof v === 'number' && isFinite(v)
                         ? `${String(v).replace('.', info && /^(en|zh)/.test(info.lang) ? '.' : ',')} °C`
                         : '';
-                const blockText = t => (TEMP_TYPES.includes(t) && fmtTemp(temps[t]) ? `${label(t)} (${fmtTemp(temps[t])})` : label(t));
-                const hhmm = m => `${String(Math.floor((m % DAY) / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+                const blockText = t =>
+                    TEMP_TYPES.includes(t) && fmtTemp(temps[t]) ? `${label(t)} (${fmtTemp(temps[t])})` : label(t);
+                const hhmm = m =>
+                    `${String(Math.floor((m % DAY) / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
                 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 function dayName(d, style) {
                     // 2024-01-01 was a Monday
@@ -486,7 +510,11 @@
                     render();
                     clearTimeout(draftTimer);
                     draftTimer = setTimeout(async () => {
-                        const program = sorted().map(p => ({ day: DAYS[Math.floor(p.m / DAY)], time: hhmm(p.m), type: p.type }));
+                        const program = sorted().map(p => ({
+                            day: DAYS[Math.floor(p.m / DAY)],
+                            time: hhmm(p.m),
+                            type: p.type,
+                        }));
                         try {
                             const r = await send('weeklyDraft', { program, temps });
                             status(`${r.count} / ${info.max} ${info.texts['Switching times']}`);
@@ -574,7 +602,12 @@
                         const tools = document.createElement('div');
                         tools.className = 'tools';
                         const copy = tool(ICON_COPY, info.texts['Copy day'], () => {
-                            clip = { start: typeAt(d * DAY), pts: points.filter(p => p.m > d * DAY && p.m < (d + 1) * DAY).map(p => ({ m: p.m - d * DAY, type: p.type })) };
+                            clip = {
+                                start: typeAt(d * DAY),
+                                pts: points
+                                    .filter(p => p.m > d * DAY && p.m < (d + 1) * DAY)
+                                    .map(p => ({ m: p.m - d * DAY, type: p.type })),
+                            };
                             render();
                         });
                         const paste = tool(ICON_PASTE, info.texts['Paste day'], () => pasteDay(d));
@@ -794,20 +827,70 @@
                     insertAt(d, bl.a + snap((bl.b - bl.a) / 2));
                 }
                 /** New switching time: the period that follows is preselected, the choice opens at once */
+                /**
+                 * New switching time at minute m: any open menu closes, the line is added with the next period
+                 * preselected, gets the focus and pulses briefly; a quiet hint next to it fades after a few seconds.
+                 * The period is changed like for every switching time: click the line.
+                 */
                 function insertAt(d, m) {
+                    closeMenu();
                     if (points.some(p => p.m === m) || !checkRoom(1)) {
                         return;
                     }
                     const types = info.types.map(t => t.type);
                     const cur = typeAt(m) || types[0];
-                    points.push({ m, type: types[(types.indexOf(cur) + 1) % types.length] });
+                    const p = { m, type: types[(types.indexOf(cur) + 1) % types.length] };
+                    points.push(p);
                     sorted();
                     changed();
                     const h = $('grid').querySelector(`[data-key="h${m}"]`);
-                    if (h) {
-                        h.focus();
-                        openMenuAt(h, d, m);
+                    if (!h) {
+                        return;
                     }
+                    h.focus();
+                    h.classList.add('new');
+                    setTimeout(() => h.classList.remove('new'), 1600);
+                    openChooser(h, d, p);
+                }
+                /**
+                 * Separate small choice right after adding a switching time: "Choose the type for 14:00" and only
+                 * the types with their temperature. A click takes it and closes; Esc or a click elsewhere keeps the
+                 * preselected type.
+                 */
+                function openChooser(anchor, d, p) {
+                    closeMenu();
+                    const menuEl = document.createElement('div');
+                    menuEl.className = 'menu chooser';
+                    menuEl.setAttribute('role', 'menu');
+                    const title = document.createElement('div');
+                    title.className = 'title';
+                    title.textContent = info.texts['Choose type for {time}'].replace('{time}', hhmm(p.m));
+                    menuEl.setAttribute('aria-label', title.textContent);
+                    menuEl.appendChild(title);
+                    let first = null;
+                    for (const { type } of info.types) {
+                        const b = document.createElement('button');
+                        b.setAttribute('role', 'menuitem');
+                        b.innerHTML = `<span class="swatch" style="background:var(--c-${type})"></span>`;
+                        b.appendChild(document.createTextNode(blockText(type) + (type === p.type ? '  ✓' : '')));
+                        b.addEventListener('click', () => {
+                            closeMenu();
+                            const bl = blocksOf(d).find(x => x.a === p.m);
+                            if (bl && type !== p.type) {
+                                setType(d, bl, type);
+                            }
+                            const h = $('grid').querySelector(`[data-key="h${p.m}"]`);
+                            if (h) {
+                                h.focus();
+                            }
+                        });
+                        menuEl.appendChild(b);
+                        if (type === p.type || !first) {
+                            first = b;
+                        }
+                    }
+                    placeMenu(menuEl, anchor);
+                    first.focus();
                 }
                 function removePoint(p) {
                     if (points.length <= 1) {
@@ -835,7 +918,10 @@
                         return;
                     }
                     const keep = points.filter(p => p.m < d * DAY || p.m >= (d + 1) * DAY);
-                    const add = [{ m: d * DAY, type: clip.start }, ...clip.pts.map(p => ({ m: d * DAY + p.m, type: p.type }))].filter(p => p.type);
+                    const add = [
+                        { m: d * DAY, type: clip.start },
+                        ...clip.pts.map(p => ({ m: d * DAY + p.m, type: p.type })),
+                    ].filter(p => p.type);
                     if (keep.length + add.length > info.max) {
                         status(`${info.max} ${info.texts['Switching times']} max.`, true);
                         return;
@@ -891,10 +977,13 @@
                     }
                     if (splitAt > bl.a && splitAt < bl.b) {
                         const b = item(ICON_SPLIT, () => {
-                            closeMenu();
                             insertAt(d, splitAt);
                         });
-                        b.appendChild(document.createTextNode(info.texts['New switching time at {time}'].replace('{time}', hhmm(splitAt))));
+                        b.appendChild(
+                            document.createTextNode(
+                                info.texts['New switching time at {time}'].replace('{time}', hhmm(splitAt)),
+                            ),
+                        );
                         menuEl.appendChild(document.createElement('hr'));
                     }
                     let first = null;
@@ -918,7 +1007,10 @@
                                 menuEl.innerHTML = '';
                                 const qEl = document.createElement('div');
                                 qEl.className = 'question';
-                                qEl.textContent = info.texts['Delete question'].replace('{time}', `${dayName(d, 'short')} ${hhmm(point.m)}`);
+                                qEl.textContent = info.texts['Delete question'].replace(
+                                    '{time}',
+                                    `${dayName(d, 'short')} ${hhmm(point.m)}`,
+                                );
                                 const row = document.createElement('div');
                                 row.className = 'row';
                                 const yes = document.createElement('button');
@@ -943,6 +1035,11 @@
                         );
                         del.appendChild(document.createTextNode(info.texts.Delete));
                     }
+                    placeMenu(menuEl, anchor);
+                    first.focus();
+                }
+                /** Keyboard and position of a menu next to its element (below, or above if there is no room) */
+                function placeMenu(menuEl, anchor) {
                     menuEl.addEventListener('keydown', ev => {
                         const items = [...menuEl.querySelectorAll('button')];
                         const i = items.indexOf(document.activeElement);
@@ -969,8 +1066,9 @@
                     menuEl.style.top = `${top}px`;
                     menuEl.style.left = `${Math.min(Math.max(r.left - 10, 4), window.innerWidth - menuEl.offsetWidth - 8)}px`;
                     menu = menuEl;
-                    first.focus();
                 }
+                // a click into the admin outside the grid closes the menu as well
+                window.addEventListener('blur', () => closeMenu());
                 document.addEventListener('pointerdown', ev => {
                     if (menu && !menu.contains(ev.target)) {
                         closeMenu();

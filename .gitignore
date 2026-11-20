@@ -16,3 +16,4 @@ lokal/
 docs/
 werkzeuge/
 __pycache__/
+test/ui/.profile/

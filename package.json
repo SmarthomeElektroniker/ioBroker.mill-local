@@ -61,6 +61,7 @@
     "test:unit": "mocha test/unit --exit",
     "test": "npm run test:package && npm run test:unit",
     "lint": "eslint .",
-    "release": "release-script"
+    "release": "release-script",
+    "test:ui": "mocha test/ui --exit"
   }
 }
