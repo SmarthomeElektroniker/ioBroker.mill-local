@@ -293,8 +293,7 @@ empty = default). **The adapter switches no recording on** – switch it on in t
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 0.4.0 (2026-11-20)
 
 - (Immanuel) **Breaking:** `control.power` is now the on/off of the thermostat, as visualisations expect it: ON returns
   to the last thermostat mode, OFF switches off. Permanent heating without thermostat only in the operation mode

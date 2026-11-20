@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "mill-local",
-    "version": "0.4.0-alpha.1",
+    "version": "0.4.0",
     "news": {
       "0.4.0": {
         "en": "Breaking: control.power is now the on/off of the thermostat (permanent heating only in the mode Switch, relay in status.heating). Weekly program as a week grid on the device card. vis widgets with ready-made views and history chart. New states for the active target and lock; takeover from ioBroker.millheater; simulator and more tests.",
