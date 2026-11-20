@@ -71,3 +71,23 @@ describe('model', () => {
         assert.strictEqual(m.activeTargetTemperature(17, ''), null);
     });
 });
+
+describe('schedule.lastTimerType', () => {
+    const assert = require('node:assert');
+    const { lastTimerType, wallToMinutes } = require('../../lib/schedule');
+    it('returns the type of the latest timer that has passed, in the time zone of the device', () => {
+        const now = Date.UTC(2026, 10, 20, 12, 0);
+        const timers = [
+            { name: 'Off', timestamp: wallToMinutes('2026-11-20T12:30') },
+            { name: 'AlwaysHeating', timestamp: wallToMinutes('2026-11-20T11:00') },
+            { name: 'Normal', timestamp: wallToMinutes('2026-11-20T09:00') },
+        ];
+        // UTC device: 12:00 local -> AlwaysHeating (11:00) ran last
+        assert.strictEqual(lastTimerType(timers, 1440, now), 'AlwaysHeating');
+        // CET device: 13:00 local -> the Off timer (12:30) has passed
+        assert.strictEqual(lastTimerType(timers, 60, now), 'Off');
+        assert.strictEqual(lastTimerType([], 60, now), '');
+        assert.strictEqual(lastTimerType(undefined, 60, now), '');
+        assert.strictEqual(lastTimerType(timers, -600, now), '');
+    });
+});

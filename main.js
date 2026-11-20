@@ -61,6 +61,10 @@ class Device {
         this.lastRediscover = 0;
         this.wrongDeviceLogged = false;
         this.offlineLogged = false;
+        this.unknownModeLogged = '';
+        /** One-off timers and time zone of the device (slow poll), to tell a timer from "Switch" */
+        this.oneOffTimers = [];
+        this.tzOffset = 1440;
         this.energy = null;
         this.timer = null;
         this.polling = false;
@@ -278,7 +282,9 @@ class MillLocal extends utils.Adapter {
         if (dev.id && dev.id !== mac) {
             if (!dev.wrongDeviceLogged) {
                 this.log.warn(
-                    `${dev.ip} is now a different Mill device (${mac} instead of ${dev.id}) - the address probably changed`,
+                    `${dev.ip} is now a different Mill device (${mac} instead of ${dev.id}) - either the address changed ` +
+                        '(the adapter searches for the old device if re-discovery is on) or the device was replaced: ' +
+                        'then enter the new MAC in the device table (or run "Search devices") and save',
                 );
                 dev.wrongDeviceLogged = true;
             }
@@ -334,6 +340,7 @@ class MillLocal extends utils.Adapter {
      */
     async createObjects(dev, st) {
         const label = dev.cfg.name || st.custom_name || st.name || dev.id;
+        await this.noteMigrationPower(dev);
         await this.extendObjectAsync(dev.id, {
             type: 'device',
             common: { name: label, statusStates: { onlineId: `${this.namespace}.${dev.id}.info.online` } },
@@ -347,6 +354,25 @@ class MillLocal extends utils.Adapter {
             await this.extendObjectAsync(`${dev.id}.${d.id}`, { type: 'state', common: d.common, native: {} });
         }
         await this.removeObsoleteStates(dev, new Set(defs.map(d => d.id)));
+    }
+
+    /**
+     * Upgrade from 0.3.x or older: control.power changed its meaning (see changelog 0.4.0). Recognised by
+     * the state status.heating, which exists since 0.4.0 - a device with control.power but without it was
+     * created by an older version. Logged once per device, before the objects are updated.
+     *
+     * @param {Device} dev Device
+     */
+    async noteMigrationPower(dev) {
+        const power = await this.getObjectAsync(`${dev.id}.control.power`);
+        const heating = await this.getObjectAsync(`${dev.id}.status.heating`);
+        if (power && !heating) {
+            this.log.warn(
+                `${dev.id}: since 0.4.0 control.power is the on/off of the thermostat (ON = last thermostat mode, ` +
+                    'OFF = mode Off). It no longer heats permanently; that is the operation mode "Switch". ' +
+                    'Scripts that read control.power as "heating now" must use status.heating.',
+            );
+        }
     }
 
     /**
@@ -411,13 +437,28 @@ class MillLocal extends utils.Adapter {
         // "Switch" = Independent device with the relay forced via 99 / 0 (no temperature control)
         const forced = Number(c.set_temperature);
         if (mode === 'Independent device' && (forced >= commands.RELAY_ON || forced <= commands.RELAY_OFF)) {
-            mode = commands.SWITCH_MODE;
+            // a one-off timer "Off" / "AlwaysHeating" reports the same values - that is not "Switch"
+            const timer = schedule.lastTimerType(dev.oneOffTimers, dev.tzOffset);
+            const byTimer =
+                (forced <= commands.RELAY_OFF && timer === 'Off') ||
+                (forced >= commands.RELAY_ON && timer === 'AlwaysHeating');
+            if (!byTimer) {
+                mode = commands.SWITCH_MODE;
+            }
         }
         if (dev.writeSeq === seq) {
             dev.mode = mode;
             if (commands.THERMOSTAT_MODES.includes(mode)) {
                 dev.lastThermostatMode = mode;
             }
+        }
+        // a mode the adapter does not know (the API documents "Invalid"): shown as reported, counts as off
+        const known = commands.THERMOSTAT_MODES.includes(mode) || mode === commands.SWITCH_MODE || mode === 'Off';
+        if (!known && dev.unknownModeLogged !== mode) {
+            this.log.warn(`${dev.id}: the device reports the unknown operation mode "${mode}"`);
+            dev.unknownModeLogged = mode;
+        } else if (known) {
+            dev.unknownModeLogged = '';
         }
         const power = model.round(c.current_power, 1) ?? 0;
         const ow = model.parseOpenWindow(c.open_window_active_now);
@@ -431,13 +472,13 @@ class MillLocal extends utils.Adapter {
         // and switched_on was false on a real socket while its relay was closed
         await this.setVal(dev, 'status.controlSignal', model.round(c.control_signal, 1));
         // switched on = not off: a thermostat mode counts even while it does not heat, "Switch" only with the relay closed
-        const switchedOn = mode === commands.SWITCH_MODE ? signal > 0 : !!mode && mode !== 'Off';
+        const switchedOn = mode === commands.SWITCH_MODE ? signal > 0 : commands.THERMOSTAT_MODES.includes(mode);
         await this.setVal(dev, 'status.switchedOn', switchedOn);
         // relay closed = heats right now (control signal > 0), in every mode
         await this.setVal(dev, 'status.heating', signal > 0);
         // active target: null (not 0) while off or in "Switch"
         await this.setStateChangedAsync(`${dev.id}.status.activeTargetTemperature`, {
-            val: model.activeTargetTemperature(c.set_temperature, mode),
+            val: known ? model.activeTargetTemperature(c.set_temperature, mode) : null,
             ack: true,
         });
         if (typeof c.lock_active === 'string') {
@@ -519,6 +560,7 @@ class MillLocal extends utils.Adapter {
                     this.log.warn(`${dev.id}: setting the time zone failed: ${err && err.message}`);
                 }
             }
+            dev.tzOffset = offset;
             await this.mirror(dev, seq, 'settings.timezoneOffset', offset);
         }
         const wp = await read('weekly-program');
@@ -527,6 +569,7 @@ class MillLocal extends utils.Adapter {
         }
         const nt = await read('non-repeatable-timers');
         if (nt) {
+            dev.oneOffTimers = Array.isArray(nt.non_repeatable_timers) ? nt.non_repeatable_timers : [];
             await this.mirror(dev, seq, 'settings.timers', schedule.timersFromDevice(nt.non_repeatable_timers));
         }
         const vac = await read('vacation-mode');
