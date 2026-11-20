@@ -195,6 +195,7 @@ describe('device manager', () => {
             'operationMode',
             'targetTemperature',
             'targetSlider',
+            'activeTarget',
             'power',
             'energyToday',
         ]);
