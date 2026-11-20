@@ -1,0 +1,214 @@
+{
+ "settings": {
+  "style": {
+   "background_class": ""
+  },
+  "theme": "redmond",
+  "sizex": "1280",
+  "sizey": "800",
+  "gridSize": "",
+  "useBackground": false,
+  "snapType": null
+ },
+ "widgets": {
+  "w00001": {
+   "tpl": "tplMillPage",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto"
+   },
+   "style": {
+    "left": "0px",
+    "top": "0px",
+    "width": "1280px",
+    "height": "800px",
+    "z-index": "1"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00002": {
+   "tpl": "tplMillTitle",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1",
+    "detailView": "Mill_Uebersicht"
+   },
+   "style": {
+    "left": "48px",
+    "top": "36px",
+    "width": "360px",
+    "height": "110px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00003": {
+   "tpl": "tplMillThermostat",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1"
+   },
+   "style": {
+    "left": "48px",
+    "top": "160px",
+    "width": "360px",
+    "height": "270px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00004": {
+   "tpl": "tplMillValues",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1"
+   },
+   "style": {
+    "left": "48px",
+    "top": "446px",
+    "width": "360px",
+    "height": "190px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00005": {
+   "tpl": "tplMillMode",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1"
+   },
+   "style": {
+    "left": "48px",
+    "top": "652px",
+    "width": "360px",
+    "height": "80px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00006": {
+   "tpl": "tplMillWeek",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1"
+   },
+   "style": {
+    "left": "432px",
+    "top": "36px",
+    "width": "800px",
+    "height": "420px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00007": {
+   "tpl": "tplMillHistory",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1",
+    "historyInstance": "",
+    "range": "24h"
+   },
+   "style": {
+    "left": "432px",
+    "top": "476px",
+    "width": "800px",
+    "height": "290px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  }
+ },
+ "name": "Mill_Geraet1"
+}

@@ -53,7 +53,8 @@
     "admin/",
     "io-package.json",
     "lib/",
-    "main.js"
+    "main.js",
+    "widgets/"
   ],
   "scripts": {
     "test:package": "mocha test/package --exit",

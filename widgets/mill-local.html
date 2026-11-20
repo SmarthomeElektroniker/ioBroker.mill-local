@@ -1,0 +1,173 @@
+<!--
+    ioBroker.mill-local - widgets for vis 1.x (set "mill-local")
+
+    Every widget needs only the device object (mill-local.<n>.<mac>); the overview widgets take up to eight.
+    Colour scheme: automatic (browser setting), light or dark. Ready-made views: vis-templates/ in the repository.
+-->
+<link
+    rel="stylesheet"
+    type="text/css"
+    href="widgets/mill-local/css/mill-local.css"
+/>
+<script
+    type="text/javascript"
+    src="widgets/mill-local/js/mill-local-i18n.js"
+></script>
+<script
+    type="text/javascript"
+    src="widgets/mill-local/js/mill-local.js"
+></script>
+
+<script
+    id="tplMillPage"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="Page background and title"
+    data-vis-attrs="title;subtitle;detailView/views;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:1280px;height:800px">
+        <% vis.binds['mill-local'].page(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillCard"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="ctrl"
+    data-vis-name="Device card"
+    data-vis-attrs="deviceOid/id;title;detailView/views;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:280px;height:320px">
+        <% vis.binds['mill-local'].card(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillPhone"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="ctrl"
+    data-vis-name="Phone card"
+    data-vis-attrs="deviceOid/id;title;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:358px;height:120px">
+        <% vis.binds['mill-local'].phone(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillTitle"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="Device title"
+    data-vis-attrs="deviceOid/id;title;detailView/views;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:360px;height:110px">
+        <% vis.binds['mill-local'].title(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillThermostat"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="ctrl"
+    data-vis-name="Room temperature and target"
+    data-vis-attrs="deviceOid/id;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:360px;height:260px">
+        <% vis.binds['mill-local'].thermostat(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillValues"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="Values"
+    data-vis-attrs="deviceOid/id;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:360px;height:170px">
+        <% vis.binds['mill-local'].values(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillMode"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="ctrl"
+    data-vis-name="Operation mode"
+    data-vis-attrs="deviceOid/id;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:360px;height:80px">
+        <% vis.binds['mill-local'].mode(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillWeek"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="Weekly program (display)"
+    data-vis-attrs="deviceOid/id;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:800px;height:420px">
+        <% vis.binds['mill-local'].week(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillToday"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="Today's periods of several devices"
+    data-vis-attrs="deviceOid1/id;deviceOid2/id;deviceOid3/id;deviceOid4/id;deviceOid5/id;deviceOid6/id;deviceOid7/id;deviceOid8/id;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:1184px;height:220px">
+        <% vis.binds['mill-local'].today(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillSummary"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="Total power and energy today"
+    data-vis-attrs="deviceOid1/id;deviceOid2/id;deviceOid3/id;deviceOid4/id;deviceOid5/id;deviceOid6/id;deviceOid7/id;deviceOid8/id;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:400px;height:60px">
+        <% vis.binds['mill-local'].summary(this.data.wid, this.view, this.data); %>
+    </div>
+</script>
+
+<script
+    id="tplMillHistory"
+    type="text/ejs"
+    class="vis-tpl"
+    data-vis-set="mill-local"
+    data-vis-type="static"
+    data-vis-name="History chart"
+    data-vis-attrs="deviceOid/id;historyInstance;range/select,24h,7d;theme/select,auto,light,dark"
+>
+    <div id="<%= this.data.attr('wid') %>" class="vis-widget <%== this.data.attr('class') %>" style="width:800px;height:260px">
+        <% vis.binds['mill-local'].history(this.data.wid, this.view, this.data); %>
+    </div>
+</script>

@@ -1,0 +1,187 @@
+{
+ "settings": {
+  "style": {
+   "background_class": ""
+  },
+  "theme": "redmond",
+  "sizex": "390",
+  "sizey": "844",
+  "gridSize": "",
+  "useBackground": false,
+  "snapType": null
+ },
+ "widgets": {
+  "w00001": {
+   "tpl": "tplMillPage",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "title": "@Heating"
+   },
+   "style": {
+    "left": "0px",
+    "top": "0px",
+    "width": "390px",
+    "height": "844px",
+    "z-index": "1"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00002": {
+   "tpl": "tplMillSummary",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid1": "mill-local.0.DEVICE_1",
+    "deviceOid2": "mill-local.0.DEVICE_2",
+    "deviceOid3": "mill-local.0.DEVICE_3",
+    "deviceOid4": "mill-local.0.DEVICE_4"
+   },
+   "style": {
+    "left": "150px",
+    "top": "30px",
+    "width": "224px",
+    "height": "60px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00003": {
+   "tpl": "tplMillPhone",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_1"
+   },
+   "style": {
+    "left": "16px",
+    "top": "110px",
+    "width": "358px",
+    "height": "120px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00004": {
+   "tpl": "tplMillPhone",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_2"
+   },
+   "style": {
+    "left": "16px",
+    "top": "242px",
+    "width": "358px",
+    "height": "120px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00005": {
+   "tpl": "tplMillPhone",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_3"
+   },
+   "style": {
+    "left": "16px",
+    "top": "374px",
+    "width": "358px",
+    "height": "120px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  },
+  "w00006": {
+   "tpl": "tplMillPhone",
+   "data": {
+    "g_fixed": false,
+    "g_visibility": false,
+    "g_css_font_text": false,
+    "g_css_background": false,
+    "g_css_shadow_padding": false,
+    "g_css_border": false,
+    "g_gestures": false,
+    "g_signals": false,
+    "g_last_change": false,
+    "visibility-cond": "==",
+    "visibility-val": 1,
+    "visibility-groups-action": "hide",
+    "refreshInterval": "0",
+    "theme": "auto",
+    "deviceOid": "mill-local.0.DEVICE_4"
+   },
+   "style": {
+    "left": "16px",
+    "top": "506px",
+    "width": "358px",
+    "height": "120px",
+    "z-index": "5"
+   },
+   "widgetSet": "mill-local"
+  }
+ },
+ "name": "Mill_Handy"
+}
