@@ -15,6 +15,7 @@ const {
     numberLineHtml,
     weeklyForm,
     weeklyFromForm,
+    weeklyUrl,
 } = require('../../lib/deviceManagement');
 const TEXT = require('../../lib/dmTexts');
 
@@ -119,7 +120,6 @@ async function load(a) {
     const r = await ask(a, 'dm:loadDevices', null);
     return r.add;
 }
-
 
 /**
  * Clicks the on/off toggle like the GUI: action, confirmation dialog, answer.
@@ -380,31 +380,24 @@ describe('device manager', () => {
         assert.ok(MODE_OPTIONS.every(o => typeof o.label === 'object'));
     });
     describe('weekly program dialog', () => {
-        it('form: table with day, time and period, hint with the temperatures in every language', () => {
-            const form = weeklyForm({ Comfort: 22, Sleep: 18, Away: 15, Normal: 20 });
-            const table = form.items.entries;
-            assert.strictEqual(table.type, 'table');
-            assert.deepStrictEqual(
-                table.items.map(i => i.attr),
-                ['day', 'time', 'type'],
+        it('form: the week grid as iframe, no help text', () => {
+            const url = weeklyUrl('mill-local.1', '94e6865e0002', 'abc');
+            assert.strictEqual(
+                url,
+                '../../adapter/mill-local/weekly.html?instance=mill-local.1&device=94e6865e0002&token=abc',
             );
-            assert.strictEqual(table.items[0].options.length, 7);
-            assert.deepStrictEqual(
-                table.items[2].options.map(o => o.value),
-                ['Comfort', 'Sleep', 'Away', 'Normal', 'Off', 'AlwaysHeating'],
-            );
-            assert.ok(form.items.hint.text.de.includes('Komfort 22 °C'));
-            assert.ok(form.items.hint.text.en.includes('Normal 20 °C'));
-            for (const l of LANGUAGES) {
-                assert.ok(!/\{(Comfort|Sleep|Away|Normal)\}/.test(form.items.hint.text[l]), l);
-            }
-            // the validator of the time column (evaluated by the admin with "data")
-            // eslint-disable-next-line no-new-func
-            const valid = new Function('data', `return ${table.items[1].validator}`);
-            assert.strictEqual(valid({ time: '06:30' }), true);
-            assert.strictEqual(valid({ time: '6:30' }), true);
-            assert.strictEqual(valid({ time: '24:00' }), false);
-            assert.strictEqual(valid({ time: '' }), false);
+            const form = weeklyForm(url);
+            assert.deepStrictEqual(Object.keys(form.items), ['grid']);
+            assert.strictEqual(form.items.grid.type, 'iframe');
+            assert.strictEqual(form.items.grid.url, url);
+        });
+
+        it('the grid page exists and loads no external code', () => {
+            const fs = require('node:fs');
+            const html = fs.readFileSync(require.resolve('../../admin/weekly.html'), 'utf8');
+            const scripts = [...html.matchAll(/<script[^>]*src="([^"]+)"/g)].map(m => m[1]);
+            assert.deepStrictEqual(scripts, ['../../lib/js/socket.io.js']);
+            assert.ok(html.includes("send('weeklyInfo'") && html.includes("send('weeklyDraft'"));
         });
 
         it('rows -> settings.weeklyProgram: sorted, validated like the state', () => {

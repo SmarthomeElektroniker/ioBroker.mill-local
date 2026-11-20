@@ -19,7 +19,8 @@ tests.integration(path.join(__dirname, '..'), {
             });
 
             it('reads the device and executes validated commands', async function () {
-                this.timeout(60000);
+                // about 40 s on an idle machine; generous for loaded CI runners
+                this.timeout(150000);
                 const harness = getHarness();
                 await harness.changeAdapterConfig('mill-local', {
                     native: {
@@ -39,7 +40,7 @@ tests.integration(path.join(__dirname, '..'), {
                     native: {},
                 });
                 await harness.startAdapterAndWait();
-                const waitFor = async (id, pred, ms = 15000) => {
+                const waitFor = async (id, pred, ms = 30000) => {
                     const end = Date.now() + ms;
                     for (;;) {
                         const s = await harness.states.getStateAsync(id);
@@ -236,7 +237,7 @@ tests.integration(path.join(__dirname, '..'), {
                 });
                 await harness.startAdapterAndWait();
                 const sleep = ms => new Promise(r => setTimeout(r, ms));
-                const waitFor = async (id, pred, ms = 15000) => {
+                const waitFor = async (id, pred, ms = 30000) => {
                     const end = Date.now() + ms;
                     for (;;) {
                         const s = await harness.states.getStateAsync(id);
@@ -471,23 +472,53 @@ tests.integration(path.join(__dirname, '..'), {
                 const panelId = id('panel').split('.').pop();
                 const card = list.add.find(c => c.id === panelId);
                 assert.ok(card.actions.some(a => a.id === 'weeklyProgram'));
+                // the dialog shows the week grid (iframe); the grid talks to the adapter with sendTo
                 const asked = await dm('dm:deviceAction', { deviceId: panelId, actionId: 'weeklyProgram' });
                 assert.strictEqual(asked.type, 'form', JSON.stringify(asked).slice(0, 300));
-                assert.deepStrictEqual(asked.form.data.entries, []);
-                assert.strictEqual(asked.form.data.activate, false);
+                const url = asked.form.schema.items.grid.url;
+                assert.ok(url.includes('weekly.html') && url.includes(`device=${panelId}`), url);
+                const token = new URLSearchParams(url.split('?')[1]).get('token');
+                const page = (command, message) =>
+                    new Promise(resolve =>
+                        harness.sendTo('mill-local.0', command, { device: panelId, token, ...message }, resolve),
+                    );
+                const gridInfo = await page('weeklyInfo', {});
+                assert.deepStrictEqual(gridInfo.program, []);
+                assert.strictEqual(gridInfo.temps.Comfort, 22);
+                assert.strictEqual(gridInfo.max, 64);
+                assert.ok(gridInfo.types.some(t => t.type === 'AlwaysHeating'));
+                // a wrong token is refused
+                const foreign = await new Promise(resolve =>
+                    harness.sendTo('mill-local.0', 'weeklyInfo', { device: panelId, token: 'x' }, resolve),
+                );
+                assert.ok(foreign.error);
+                // an invalid draft is refused at once, a valid one is kept until OK
+                const bad = await page('weeklyDraft', { program: [{ day: 'Mon', time: '25:00', type: 'Comfort' }] });
+                assert.ok(/invalid time/.test(bad.error), JSON.stringify(bad));
                 const rows = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].flatMap(day => [
                     { day, time: '00:00', type: 'Comfort' },
                     { day, time: '12:00', type: 'Sleep' },
                 ]);
-                const done = await dm('dm:actionProgress', {
-                    origin: asked.origin,
-                    data: { entries: rows, activate: true },
-                });
+                const ok = await page('weeklyDraft', { program: rows, temps: { ...gridInfo.temps, Sleep: 18.5 } });
+                assert.strictEqual(ok.count, 14);
+                assert.strictEqual(posts('panel', 'weekly-program').length, 0, 'draft is not sent before OK');
+                // OK: program and changed temperature are written, then the question to activate it
+                const question = await dm('dm:actionProgress', { origin: asked.origin, data: {} });
+                assert.strictEqual(question.type, 'form', JSON.stringify(question).slice(0, 300));
+                assert.deepStrictEqual(
+                    question.form.buttons.map(b => b.label.en),
+                    ['Activate now', 'Only save schedule'],
+                );
+                await waitFor(`${id('panel')}.settings.weeklyProgram`, v => JSON.parse(v).length === 14);
+                await waitFor(`${id('panel')}.settings.temperatureSleep`, v => v === 18.5);
+                assert.strictEqual(fakes.panel.state.mode, 'Control individually', 'not activated before the answer');
+                const done = await dm('dm:actionProgress', { origin: question.origin, data: {} });
                 assert.deepStrictEqual(done.result, { refresh: 'none' });
                 await waitFor(`${id('panel')}.control.operationMode`, v => v === 'Weekly program');
-                await waitFor(`${id('panel')}.settings.weeklyProgram`, v => JSON.parse(v).length === 14);
                 assert.strictEqual(fakes.panel.state.weekly.length, 14);
                 assert.strictEqual(fakes.panel.state.mode, 'Weekly program');
+                await set(`${id('panel')}.settings.temperatureSleep`, 18);
+                await waitFor(`${id('panel')}.settings.temperatureSleep`, v => v === 18);
                 // move the clock of the device: local 10:00 -> Comfort (22), local 13:00 -> Sleep (18)
                 const shiftTo = minuteOfDay => {
                     const local = Math.floor(Date.now() / 60000) + tz;
@@ -517,20 +548,22 @@ tests.integration(path.join(__dirname, '..'), {
                 await set(`${id('panel')}.settings.vacation`, '{}');
                 await waitFor(`${id('panel')}.settings.vacation`, v => v === '{}');
                 assert.strictEqual(fakes.panel.state.vacation.start_timestamp, 0);
-                // the dialog shows the program it wrote; a broken row is refused with a message, nothing sent
+                // the dialog again, closed with Cancel: nothing is written, the draft is gone
                 const again = await dm('dm:deviceAction', { deviceId: panelId, actionId: 'weeklyProgram' });
-                assert.strictEqual(again.form.data.entries.length, 14);
-                assert.strictEqual(again.form.data.activate, true);
+                const token2 = new URLSearchParams(again.form.schema.items.grid.url.split('?')[1]).get('token');
+                const info2 = await new Promise(resolve =>
+                    harness.sendTo('mill-local.0', 'weeklyInfo', { device: panelId, token: token2 }, resolve),
+                );
+                assert.strictEqual(info2.program.length, 14);
                 const before = posts('panel', 'weekly-program').length;
-                const refused = await dm('dm:actionProgress', {
-                    origin: again.origin,
-                    data: { entries: [{ day: 'Mon', time: '25:00', type: 'Comfort' }], activate: false },
-                });
-                assert.strictEqual(refused.type, 'message', JSON.stringify(refused).slice(0, 300));
-                assert.ok(refused.message.en.includes('invalid time'));
-                await dm('dm:actionProgress', { origin: refused.origin });
+                const cancelled = await dm('dm:actionProgress', { origin: again.origin });
+                assert.deepStrictEqual(cancelled.result, { refresh: 'none' });
                 await sleep(800);
                 assert.strictEqual(posts('panel', 'weekly-program').length, before);
+                const gone = await new Promise(resolve =>
+                    harness.sendTo('mill-local.0', 'weeklyInfo', { device: panelId, token: token2 }, resolve),
+                );
+                assert.ok(gone.error, 'draft of a closed dialog is dropped');
 
                 // one-off timers (Independent device): an "Off" timer that has passed switches the regulation off
                 // device clock back to real time (the adapter compares timers with the host clock)

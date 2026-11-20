@@ -893,6 +893,19 @@ class MillLocal extends utils.Adapter {
             // dm:* is answered by the device manager (lib/deviceManagement.js)
             return;
         }
+        if (obj.command === 'weeklyInfo' || obj.command === 'weeklyDraft') {
+            // the week grid of the device card (admin/weekly.html)
+            let reply;
+            try {
+                reply = await this.deviceManagement.weeklyMessage(obj.command, obj.message || {});
+            } catch (err) {
+                reply = { error: err.message };
+            }
+            if (obj.callback) {
+                this.sendTo(obj.from, obj.command, reply, obj.callback);
+            }
+            return;
+        }
         if (obj.command === 'importMillheater') {
             // takeover from ioBroker.millheater: reads its instances, answers with the filled device table
             let reply;

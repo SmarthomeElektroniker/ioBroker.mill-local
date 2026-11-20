@@ -1,0 +1,762 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Mill weekly program</title>
+        <!--
+            Week grid of the weekly program (device manager dialog of mill-local, loaded as iframe).
+            One row per weekday, 0-24 h; every block is a period (Comfort, Sleep, ...). Borders are switching
+            points: drag them (15-min steps) or move them with the arrow keys; click a block to change its period,
+            double-click to split it. The page asks the adapter for the program (sendTo weeklyInfo) and sends every
+            change as a draft (sendTo weeklyDraft); the dialog's OK writes it to the device.
+            No external code: plain HTML, CSS and JavaScript; the socket comes from the admin (/lib/js/socket.io.js).
+        -->
+        <script src="../../lib/js/socket.io.js"></script>
+        <style>
+            :root {
+                --bg: #ffffff;
+                --fg: #1f1f1f;
+                --muted: #6b6b6b;
+                --line: #d9d9d9;
+                --track: #f2f2f2;
+                --focus: #1565c0;
+                --menu: #ffffff;
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+                --c-Comfort: #ef6c00;
+                --c-Normal: #2e7d32;
+                --c-Sleep: #3949ab;
+                --c-Away: #00838f;
+                --c-Off: #757575;
+                --c-AlwaysHeating: #c62828;
+                --c-none: #bdbdbd;
+            }
+            body.dark {
+                --bg: #1e1e1e;
+                --fg: #ececec;
+                --muted: #a9a9a9;
+                --line: #3a3a3a;
+                --track: #2a2a2a;
+                --focus: #90caf9;
+                --menu: #2c2c2c;
+                --shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+                --c-Comfort: #f57c00;
+                --c-Normal: #388e3c;
+                --c-Sleep: #5c6bc0;
+                --c-Away: #00838f;
+                --c-Off: #616161;
+                --c-AlwaysHeating: #d32f2f;
+                --c-none: #4a4a4a;
+            }
+            html,
+            body {
+                margin: 0;
+                padding: 0;
+                background: transparent;
+                color: var(--fg);
+                font-family: Roboto, 'Segoe UI', Arial, sans-serif;
+                font-size: 14px;
+                user-select: none;
+            }
+            #legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 6px 14px;
+                margin: 2px 0 12px 0;
+                align-items: center;
+            }
+            .chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+            }
+            .swatch {
+                width: 14px;
+                height: 14px;
+                border-radius: 3px;
+                display: inline-block;
+            }
+            .chip input {
+                width: 54px;
+                font: inherit;
+                color: var(--fg);
+                background: var(--track);
+                border: 1px solid var(--line);
+                border-radius: 4px;
+                padding: 2px 4px;
+                text-align: right;
+            }
+            #grid {
+                display: grid;
+                grid-template-columns: 44px 1fr 64px;
+                row-gap: 6px;
+                column-gap: 8px;
+                align-items: center;
+            }
+            .day {
+                font-weight: 500;
+            }
+            .day.today {
+                color: var(--focus);
+            }
+            .scale {
+                position: relative;
+                height: 16px;
+                color: var(--muted);
+                font-size: 12px;
+            }
+            .scale span {
+                position: absolute;
+                transform: translateX(-50%);
+            }
+            .track {
+                position: relative;
+                height: 40px;
+                background: var(--track);
+                border-radius: 6px;
+                overflow: visible;
+            }
+            .block {
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                border: 0;
+                margin: 0;
+                padding: 0 6px;
+                color: #fff;
+                font: inherit;
+                font-size: 13px;
+                text-align: left;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                cursor: pointer;
+                border-right: 1px solid var(--bg);
+            }
+            .block:first-child {
+                border-radius: 6px 0 0 6px;
+            }
+            .block.last {
+                border-radius: 0 6px 6px 0;
+                border-right: 0;
+            }
+            .block.only {
+                border-radius: 6px;
+            }
+            .block:focus-visible,
+            .handle:focus-visible,
+            .tool:focus-visible,
+            .menu button:focus-visible {
+                outline: 3px solid var(--focus);
+                outline-offset: 1px;
+                z-index: 5;
+            }
+            .handle {
+                position: absolute;
+                top: -4px;
+                bottom: -4px;
+                width: 12px;
+                margin-left: -6px;
+                border: 0;
+                padding: 0;
+                background: transparent;
+                cursor: ew-resize;
+                z-index: 3;
+                touch-action: none;
+            }
+            .handle::after {
+                content: '';
+                position: absolute;
+                left: 4px;
+                top: 6px;
+                bottom: 6px;
+                width: 4px;
+                border-radius: 2px;
+                background: var(--fg);
+                opacity: 0.55;
+            }
+            .handle:hover::after,
+            .handle.drag::after {
+                opacity: 1;
+            }
+            .tip {
+                position: absolute;
+                top: -22px;
+                transform: translateX(-50%);
+                background: var(--fg);
+                color: var(--bg);
+                font-size: 12px;
+                padding: 1px 5px;
+                border-radius: 3px;
+                pointer-events: none;
+                z-index: 6;
+            }
+            .now {
+                position: absolute;
+                top: -3px;
+                bottom: -3px;
+                width: 2px;
+                background: var(--fg);
+                pointer-events: none;
+                z-index: 2;
+            }
+            .tools {
+                display: flex;
+                gap: 2px;
+            }
+            .tool {
+                width: 30px;
+                height: 30px;
+                border: 0;
+                border-radius: 50%;
+                background: transparent;
+                color: var(--fg);
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .tool:hover {
+                background: var(--track);
+            }
+            .tool:disabled {
+                opacity: 0.3;
+                cursor: default;
+            }
+            .tool svg {
+                width: 18px;
+                height: 18px;
+                fill: currentColor;
+            }
+            #status {
+                margin-top: 12px;
+                color: var(--muted);
+                font-size: 12px;
+                min-height: 16px;
+            }
+            #status.error {
+                color: #e53935;
+            }
+            .menu {
+                position: absolute;
+                background: var(--menu);
+                color: var(--fg);
+                box-shadow: var(--shadow);
+                border-radius: 6px;
+                padding: 4px;
+                z-index: 20;
+                display: flex;
+                flex-direction: column;
+                min-width: 190px;
+            }
+            .menu button {
+                border: 0;
+                background: transparent;
+                color: inherit;
+                font: inherit;
+                text-align: left;
+                padding: 6px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .menu button:hover {
+                background: var(--track);
+            }
+            .menu hr {
+                border: 0;
+                border-top: 1px solid var(--line);
+                margin: 4px 0;
+                width: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="legend"></div>
+        <div id="grid" role="grid"></div>
+        <div id="status" aria-live="polite"></div>
+        <script>
+            'use strict';
+            (function () {
+                const STEP = 15;
+                const DAY = 1440;
+                const WEEK = 7 * DAY;
+                const TEMP_TYPES = ['Comfort', 'Sleep', 'Away', 'Normal'];
+                const q = new URLSearchParams(location.search);
+                const INSTANCE = q.get('instance') || 'mill-local.0';
+                const DEVICE = q.get('device') || '';
+                const TOKEN = q.get('token') || '';
+                const $ = id => document.getElementById(id);
+                const ICON_COPY =
+                    '<svg viewBox="0 0 24 24"><path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"/></svg>';
+                const ICON_PASTE =
+                    '<svg viewBox="0 0 24 24"><path d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z"/></svg>';
+
+                let info = null;
+                let points = []; // [{m: minutes since Monday 00:00, type}]
+                let temps = {};
+                let clip = null;
+                let menu = null;
+                let socket = null;
+
+                // ---------- theme: follow the admin (same origin), otherwise the system ----------
+                function applyTheme() {
+                    let dark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    try {
+                        const bg = getComputedStyle(window.parent.document.body).backgroundColor;
+                        const m = /rgba?\((\d+), *(\d+), *(\d+)/.exec(bg);
+                        if (m) {
+                            dark = 0.299 * m[1] + 0.587 * m[2] + 0.114 * m[3] < 128;
+                        }
+                    } catch {
+                        // not embedded
+                    }
+                    document.body.classList.toggle('dark', !!dark);
+                }
+
+                // ---------- model ----------
+                const sorted = () => points.sort((a, b) => a.m - b.m);
+                const label = t => (info ? (info.types.find(x => x.type === t) || {}).label || t : t);
+                const fmtTemp = v =>
+                    typeof v === 'number' && isFinite(v)
+                        ? `${String(v).replace('.', info && /^(en|zh)/.test(info.lang) ? '.' : ',')} °C`
+                        : '';
+                const blockText = t => (TEMP_TYPES.includes(t) && fmtTemp(temps[t]) ? `${label(t)} (${fmtTemp(temps[t])})` : label(t));
+                const hhmm = m => `${String(Math.floor((m % DAY) / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+                const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                function dayName(d, style) {
+                    // 2024-01-01 was a Monday
+                    try {
+                        return new Intl.DateTimeFormat(info ? info.lang : undefined, { weekday: style }).format(
+                            new Date(2024, 0, 1 + d),
+                        );
+                    } catch {
+                        return DAYS[d];
+                    }
+                }
+                function typeAt(m) {
+                    if (!points.length) {
+                        return null;
+                    }
+                    let t = points[points.length - 1].type;
+                    for (const p of points) {
+                        if (p.m <= m) {
+                            t = p.type;
+                        }
+                    }
+                    return t;
+                }
+                function normalise() {
+                    sorted();
+                    if (points.length < 2) {
+                        return;
+                    }
+                    // a switching point that repeats the period before it changes nothing
+                    for (let i = points.length - 1; i >= 0 && points.length > 1; i--) {
+                        const prev = points[(i - 1 + points.length) % points.length];
+                        if (prev !== points[i] && prev.type === points[i].type) {
+                            points.splice(i, 1);
+                        }
+                    }
+                }
+                function blocksOf(d) {
+                    const start = d * DAY;
+                    const end = start + DAY;
+                    const inner = points.filter(p => p.m > start && p.m < end).map(p => p.m);
+                    const cuts = [start, ...inner, end];
+                    const out = [];
+                    for (let i = 0; i < cuts.length - 1; i++) {
+                        out.push({ a: cuts[i], b: cuts[i + 1], type: typeAt(cuts[i]) });
+                    }
+                    return out;
+                }
+
+                // ---------- talking to the adapter ----------
+                function send(command, message) {
+                    return new Promise((resolve, reject) => {
+                        const timer = setTimeout(() => reject(new Error('timeout')), 15000);
+                        socket.emit('sendTo', INSTANCE, command, { device: DEVICE, token: TOKEN, ...message }, res => {
+                            clearTimeout(timer);
+                            if (res && res.error) {
+                                reject(new Error(res.error));
+                            } else {
+                                resolve(res);
+                            }
+                        });
+                    });
+                }
+                let draftTimer = null;
+                function changed() {
+                    render();
+                    clearTimeout(draftTimer);
+                    draftTimer = setTimeout(async () => {
+                        const program = sorted().map(p => ({ day: DAYS[Math.floor(p.m / DAY)], time: hhmm(p.m), type: p.type }));
+                        try {
+                            const r = await send('weeklyDraft', { program, temps });
+                            status(`${r.count} / ${info.max} ${info.texts['Switching points']}`);
+                        } catch (err) {
+                            status(err.message, true);
+                        }
+                    }, 250);
+                }
+                function status(text, error) {
+                    $('status').textContent = text;
+                    $('status').classList.toggle('error', !!error);
+                }
+
+                // ---------- drawing ----------
+                function render() {
+                    closeMenu();
+                    const focusKey = document.activeElement && document.activeElement.dataset.key;
+                    const grid = $('grid');
+                    grid.innerHTML = '';
+                    grid.appendChild(document.createElement('div'));
+                    const scale = document.createElement('div');
+                    scale.className = 'scale';
+                    for (let h = 0; h <= 24; h += 2) {
+                        const s = document.createElement('span');
+                        s.style.left = `${(h / 24) * 100}%`;
+                        s.textContent = String(h);
+                        scale.appendChild(s);
+                    }
+                    grid.appendChild(scale);
+                    grid.appendChild(document.createElement('div'));
+                    const now = new Date();
+                    const today = (now.getDay() + 6) % 7;
+                    for (let d = 0; d < 7; d++) {
+                        const name = document.createElement('div');
+                        name.className = `day${d === today ? ' today' : ''}`;
+                        name.textContent = dayName(d, 'short');
+                        name.title = dayName(d, 'long');
+                        grid.appendChild(name);
+                        const track = document.createElement('div');
+                        track.className = 'track';
+                        track.dataset.day = String(d);
+                        track.setAttribute('role', 'row');
+                        track.setAttribute('aria-label', dayName(d, 'long'));
+                        const blocks = blocksOf(d);
+                        blocks.forEach((bl, i) => {
+                            const b = document.createElement('button');
+                            b.className = `block${blocks.length === 1 ? ' only' : i === blocks.length - 1 ? ' last' : ''}`;
+                            b.style.left = `${((bl.a - d * DAY) / DAY) * 100}%`;
+                            b.style.width = `${((bl.b - bl.a) / DAY) * 100}%`;
+                            b.style.background = `var(--c-${bl.type || 'none'})`;
+                            b.textContent = bl.type ? blockText(bl.type) : '–';
+                            b.title = `${dayName(d, 'long')} ${hhmm(bl.a)}–${bl.b % DAY ? hhmm(bl.b) : '24:00'}: ${bl.type ? blockText(bl.type) : '–'}`;
+                            b.setAttribute('aria-label', b.title);
+                            b.dataset.key = `b${d}-${bl.a}`;
+                            b.addEventListener('click', () => openMenu(b, d, bl));
+                            b.addEventListener('dblclick', ev => split(d, bl, minuteAt(track, ev.clientX, d)));
+                            track.appendChild(b);
+                        });
+                        for (const p of points.filter(x => x.m >= d * DAY && x.m < (d + 1) * DAY)) {
+                            const h = document.createElement('button');
+                            h.className = 'handle';
+                            h.style.left = `${((p.m - d * DAY) / DAY) * 100}%`;
+                            h.title = `${dayName(d, 'long')} ${hhmm(p.m)} → ${blockText(p.type)}`;
+                            h.setAttribute('role', 'slider');
+                            h.setAttribute('aria-label', h.title);
+                            h.setAttribute('aria-valuetext', hhmm(p.m));
+                            h.dataset.key = `h${p.m}`;
+                            h.addEventListener('pointerdown', ev => startDrag(ev, h, track, d, p));
+                            h.addEventListener('keydown', ev => handleKey(ev, d, p));
+                            track.appendChild(h);
+                        }
+                        if (d === today) {
+                            const n = document.createElement('div');
+                            n.className = 'now';
+                            n.style.left = `${((now.getHours() * 60 + now.getMinutes()) / DAY) * 100}%`;
+                            track.appendChild(n);
+                        }
+                        grid.appendChild(track);
+                        const tools = document.createElement('div');
+                        tools.className = 'tools';
+                        const copy = tool(ICON_COPY, info.texts['Copy day'], () => {
+                            clip = { start: typeAt(d * DAY), pts: points.filter(p => p.m > d * DAY && p.m < (d + 1) * DAY).map(p => ({ m: p.m - d * DAY, type: p.type })) };
+                            render();
+                        });
+                        const paste = tool(ICON_PASTE, info.texts['Paste day'], () => pasteDay(d));
+                        paste.disabled = !clip;
+                        tools.append(copy, paste);
+                        grid.appendChild(tools);
+                    }
+                    if (focusKey) {
+                        const el = grid.querySelector(`[data-key="${focusKey}"]`);
+                        if (el) {
+                            el.focus();
+                        }
+                    }
+                }
+                function tool(icon, title, fn) {
+                    const b = document.createElement('button');
+                    b.className = 'tool';
+                    b.innerHTML = icon;
+                    b.title = title;
+                    b.setAttribute('aria-label', title);
+                    b.addEventListener('click', fn);
+                    return b;
+                }
+                function legend() {
+                    const el = $('legend');
+                    el.innerHTML = '';
+                    for (const { type } of info.types) {
+                        const c = document.createElement('label');
+                        c.className = 'chip';
+                        const sw = document.createElement('span');
+                        sw.className = 'swatch';
+                        sw.style.background = `var(--c-${type})`;
+                        c.append(sw, document.createTextNode(label(type)));
+                        if (TEMP_TYPES.includes(type)) {
+                            const inp = document.createElement('input');
+                            inp.type = 'number';
+                            inp.min = '5';
+                            inp.max = '35';
+                            inp.step = '0.5';
+                            inp.value = temps[type] ?? '';
+                            inp.setAttribute('aria-label', `${label(type)} °C`);
+                            inp.addEventListener('change', () => {
+                                const v = Math.round(Number(inp.value) * 2) / 2;
+                                if (isFinite(v) && v >= 5 && v <= 35) {
+                                    temps[type] = v;
+                                    inp.value = String(v);
+                                    changed();
+                                } else {
+                                    inp.value = temps[type] ?? '';
+                                }
+                            });
+                            c.append(inp, document.createTextNode('°C'));
+                        }
+                        el.appendChild(c);
+                    }
+                }
+
+                // ---------- editing ----------
+                const snap = m => Math.round(m / STEP) * STEP;
+                function minuteAt(track, clientX, d) {
+                    const r = track.getBoundingClientRect();
+                    return d * DAY + snap(Math.min(Math.max((clientX - r.left) / r.width, 0), 1) * DAY);
+                }
+                function limits(d, p) {
+                    sorted();
+                    const i = points.indexOf(p);
+                    const prev = points[i - 1];
+                    const next = points[i + 1];
+                    let lo = d * DAY;
+                    let hi = (d + 1) * DAY - STEP;
+                    if (prev && prev.m >= d * DAY) {
+                        lo = prev.m + STEP;
+                    }
+                    if (next && next.m < (d + 1) * DAY) {
+                        hi = next.m - STEP;
+                    }
+                    return [lo, hi];
+                }
+                function move(d, p, m) {
+                    const [lo, hi] = limits(d, p);
+                    p.m = Math.min(Math.max(m, lo), hi);
+                }
+                function startDrag(ev, handle, track, d, p) {
+                    ev.preventDefault();
+                    handle.focus();
+                    handle.classList.add('drag');
+                    const tip = document.createElement('div');
+                    tip.className = 'tip';
+                    track.appendChild(tip);
+                    const onMove = e => {
+                        move(d, p, minuteAt(track, e.clientX, d));
+                        const x = `${((p.m - d * DAY) / DAY) * 100}%`;
+                        handle.style.left = x;
+                        tip.style.left = x;
+                        tip.textContent = hhmm(p.m);
+                        // live preview of the two neighbouring blocks
+                        const blocks = track.querySelectorAll('.block');
+                        blocksOf(d).forEach((bl, i) => {
+                            if (blocks[i]) {
+                                blocks[i].style.left = `${((bl.a - d * DAY) / DAY) * 100}%`;
+                                blocks[i].style.width = `${((bl.b - bl.a) / DAY) * 100}%`;
+                            }
+                        });
+                    };
+                    const onUp = () => {
+                        window.removeEventListener('pointermove', onMove);
+                        window.removeEventListener('pointerup', onUp);
+                        changed();
+                    };
+                    window.addEventListener('pointermove', onMove);
+                    window.addEventListener('pointerup', onUp);
+                    onMove(ev);
+                }
+                function handleKey(ev, d, p) {
+                    const step = ev.shiftKey ? 60 : STEP;
+                    if (ev.key === 'ArrowLeft' || ev.key === 'ArrowDown') {
+                        move(d, p, p.m - step);
+                    } else if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') {
+                        move(d, p, p.m + step);
+                    } else if (ev.key === 'Delete' || ev.key === 'Backspace') {
+                        removePoint(p);
+                        return;
+                    } else {
+                        return;
+                    }
+                    ev.preventDefault();
+                    ev.target.dataset.key = `h${p.m}`;
+                    changed();
+                }
+                function removePoint(p) {
+                    if (points.length <= 1) {
+                        return;
+                    }
+                    points.splice(points.indexOf(p), 1);
+                    normalise();
+                    changed();
+                }
+                function setType(d, bl, type) {
+                    const at = points.find(p => p.m === bl.a);
+                    if (at) {
+                        at.type = type;
+                    } else {
+                        if (!checkRoom(1)) {
+                            return;
+                        }
+                        points.push({ m: bl.a, type });
+                    }
+                    normalise();
+                    changed();
+                }
+                function split(d, bl, m) {
+                    if (m <= bl.a || m >= bl.b || !checkRoom(1)) {
+                        return;
+                    }
+                    const types = info.types.map(t => t.type);
+                    const cur = bl.type || types[0];
+                    const next = types[(types.indexOf(cur) + 1) % types.length];
+                    const p = { m, type: next };
+                    points.push(p);
+                    sorted();
+                    changed();
+                    const btn = $('grid').querySelector(`[data-key="b${d}-${m}"]`);
+                    if (btn) {
+                        btn.focus();
+                        openMenu(btn, d, { a: m, b: bl.b, type: next });
+                    }
+                }
+                function pasteDay(d) {
+                    if (!clip) {
+                        return;
+                    }
+                    const keep = points.filter(p => p.m < d * DAY || p.m >= (d + 1) * DAY);
+                    const add = [{ m: d * DAY, type: clip.start }, ...clip.pts.map(p => ({ m: d * DAY + p.m, type: p.type }))].filter(p => p.type);
+                    if (keep.length + add.length > info.max) {
+                        status(`${info.max} ${info.texts['Switching points']} max.`, true);
+                        return;
+                    }
+                    points = [...keep, ...add];
+                    normalise();
+                    changed();
+                }
+                function checkRoom(n) {
+                    if (points.length + n > info.max) {
+                        status(`${info.max} ${info.texts['Switching points']} max.`, true);
+                        return false;
+                    }
+                    return true;
+                }
+
+                // ---------- period menu ----------
+                function closeMenu() {
+                    if (menu) {
+                        menu.remove();
+                        menu = null;
+                    }
+                }
+                function openMenu(anchor, d, bl) {
+                    closeMenu();
+                    const m = document.createElement('div');
+                    m.className = 'menu';
+                    m.setAttribute('role', 'menu');
+                    const item = (html, fn) => {
+                        const b = document.createElement('button');
+                        b.setAttribute('role', 'menuitem');
+                        b.innerHTML = html;
+                        b.addEventListener('click', () => {
+                            closeMenu();
+                            fn();
+                        });
+                        m.appendChild(b);
+                        return b;
+                    };
+                    let first = null;
+                    for (const { type } of info.types) {
+                        const b = item(`<span class="swatch" style="background:var(--c-${type})"></span>`, () => setType(d, bl, type));
+                        b.appendChild(document.createTextNode(blockText(type) + (type === bl.type ? '  ✓' : '')));
+                        first = first || b;
+                    }
+                    m.appendChild(document.createElement('hr'));
+                    const mid = bl.a + snap((bl.b - bl.a) / 2);
+                    if (mid > bl.a && mid < bl.b) {
+                        item(`${info.texts['Split here']} (${hhmm(mid)})`, () => split(d, bl, mid));
+                    }
+                    const at = points.find(p => p.m === bl.a);
+                    if (at && points.length > 1) {
+                        item(`${info.texts['Remove switching point']} (${hhmm(at.m)})`, () => removePoint(at));
+                    }
+                    m.addEventListener('keydown', ev => {
+                        const items = [...m.querySelectorAll('button')];
+                        const i = items.indexOf(document.activeElement);
+                        if (ev.key === 'Escape') {
+                            closeMenu();
+                            anchor.focus();
+                        } else if (ev.key === 'ArrowDown') {
+                            items[(i + 1) % items.length].focus();
+                        } else if (ev.key === 'ArrowUp') {
+                            items[(i - 1 + items.length) % items.length].focus();
+                        } else {
+                            return;
+                        }
+                        ev.preventDefault();
+                    });
+                    document.body.appendChild(m);
+                    const r = anchor.getBoundingClientRect();
+                    const top = Math.min(r.bottom + 4 + window.scrollY, document.documentElement.scrollHeight - m.offsetHeight - 4);
+                    m.style.top = `${Math.max(0, top)}px`;
+                    m.style.left = `${Math.min(Math.max(r.left, 4), window.innerWidth - m.offsetWidth - 8)}px`;
+                    menu = m;
+                    first.focus();
+                }
+                document.addEventListener('pointerdown', ev => {
+                    if (menu && !menu.contains(ev.target)) {
+                        closeMenu();
+                    }
+                });
+
+                // ---------- start ----------
+                async function start() {
+                    applyTheme();
+                    const base = location.pathname.replace(/\/adapter\/.*$/, '');
+                    socket = io.connect('/', { path: `${base}/socket.io` });
+                    socket.on('connect', async () => {
+                        try {
+                            info = await send('weeklyInfo', {});
+                            temps = { ...info.temps };
+                            const di = Object.fromEntries(DAYS.map((d, i) => [d, i]));
+                            points = (info.program || []).map(e => {
+                                const [h, mi] = String(e.time).split(':').map(Number);
+                                return { m: di[e.day] * DAY + h * 60 + mi, type: e.type };
+                            });
+                            sorted();
+                            legend();
+                            render();
+                            status(`${points.length} / ${info.max} ${info.texts['Switching points']}`);
+                        } catch (err) {
+                            status(err.message, true);
+                        }
+                    });
+                }
+                start();
+            })();
+        </script>
+    </body>
+</html>
