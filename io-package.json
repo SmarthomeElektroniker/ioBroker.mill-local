@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "mill-local",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "news": {
+      "0.4.1": {
+        "en": "Fix: integration test on hosts in UTC; no functional changes compared to 0.4.0.",
+        "de": "Fix: Integrationstest auf Rechnern in UTC; keine funktionalen Änderungen gegenüber 0.4.0.",
+        "ru": "Исправление: интеграционный тест на хостах в UTC; функциональных изменений по сравнению с 0.4.0 нет.",
+        "pt": "Correção: teste de integração em anfitriões em UTC; sem alterações funcionais em relação à 0.4.0.",
+        "nl": "Fix: integratietest op hosts in UTC; geen functionele wijzigingen ten opzichte van 0.4.0.",
+        "fr": "Correctif : test d'intégration sur les hôtes en UTC ; aucune modification fonctionnelle par rapport à 0.4.0.",
+        "it": "Correzione: test di integrazione su host in UTC; nessuna modifica funzionale rispetto alla 0.4.0.",
+        "es": "Corrección: prueba de integración en equipos en UTC; sin cambios funcionales respecto a 0.4.0.",
+        "pl": "Poprawka: test integracyjny na hostach w UTC; brak zmian funkcjonalnych względem 0.4.0.",
+        "uk": "Виправлення: інтеграційний тест на хостах в UTC; функціональних змін порівняно з 0.4.0 немає.",
+        "zh-cn": "修复：UTC 主机上的集成测试；与 0.4.0 相比没有功能变化。"
+      },
       "0.4.0": {
         "en": "Breaking: control.power is now the on/off of the thermostat (permanent heating only in the mode Switch, relay in status.heating). Weekly program as a week grid on the device card. vis widgets with ready-made views and history chart. New states for the active target and lock; takeover from ioBroker.millheater; simulator and more tests.",
         "de": "Wichtig: control.power ist jetzt Ein/Aus des Thermostats (Dauerheizen nur in der Betriebsart Switch, Relais in status.heating). Wochenprogramm als Wochenraster auf der Gerätekarte. vis-Widgets mit fertigen Ansichten und Verlaufsdiagramm. Neue Datenpunkte für aktiven Sollwert und Sperre; Übernahme aus ioBroker.millheater; Simulator und mehr Tests.",

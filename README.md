@@ -293,6 +293,11 @@ empty = default). **The adapter switches no recording on** – switch it on in t
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### 0.4.1 (2026-11-20)
+
+- (Immanuel) Fix: the integration test failed on hosts in UTC (time zone offset -0 instead of 0); no functional changes
+  compared to 0.4.0.
+
 ### 0.4.0 (2026-11-20)
 
 - (Immanuel) **Breaking:** `control.power` is now the on/off of the thermostat, as visualisations expect it: ON returns
