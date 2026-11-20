@@ -75,31 +75,65 @@
             #legend {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 6px 14px;
+                gap: 8px;
                 margin: 2px 0 12px 0;
                 align-items: center;
             }
             .chip {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: 2px;
+                height: 30px;
+                padding: 0 4px 0 12px;
+                border-radius: 15px;
+                background: var(--chip, var(--c-none));
+                color: var(--block-fg);
                 white-space: nowrap;
+                font-size: 13px;
             }
-            .swatch {
-                width: 14px;
-                height: 14px;
-                border-radius: 3px;
-                display: inline-block;
+            .chip.plain {
+                padding-right: 12px;
+            }
+            .chip .name {
+                margin-right: 6px;
+            }
+            .chip button {
+                border: 0;
+                background: transparent;
+                color: inherit;
+                font: inherit;
+                cursor: pointer;
+                border-radius: 12px;
+                height: 24px;
+                min-width: 24px;
+                padding: 0 4px;
+            }
+            .chip button:hover {
+                background: rgba(255, 255, 255, 0.18);
+            }
+            body.dark .chip button:hover {
+                background: rgba(0, 0, 0, 0.12);
+            }
+            .chip button:focus-visible,
+            .chip input:focus-visible {
+                outline: 2px solid var(--block-fg);
+                outline-offset: 0;
+            }
+            .chip .val {
+                font-weight: 500;
+                min-width: 52px;
             }
             .chip input {
-                width: 54px;
+                width: 52px;
+                height: 22px;
+                border: 0;
+                border-radius: 11px;
+                padding: 0 6px;
+                text-align: center;
                 font: inherit;
+                font-weight: 500;
                 color: var(--fg);
-                background: var(--track);
-                border: 1px solid var(--line);
-                border-radius: 4px;
-                padding: 2px 4px;
-                text-align: right;
+                background: var(--bg);
             }
             #grid {
                 display: grid;
@@ -635,36 +669,94 @@
                     b.addEventListener('click', fn);
                     return b;
                 }
+                /**
+                 * Head line: one coloured chip per type, like the blocks: "Komfort − 22 °C +". −/+ change by 0.5 °C,
+                 * a click on the value turns it into a plain input (Enter takes it, Esc cancels); arrow keys on the
+                 * value change it as well. Off and Always heating have no temperature.
+                 */
                 function legend() {
                     const el = $('legend');
                     el.innerHTML = '';
+                    const setTemp = (type, v) => {
+                        v = Math.round(Number(v) * 2) / 2;
+                        if (!isFinite(v) || v < 5 || v > 35 || v === temps[type]) {
+                            return false;
+                        }
+                        temps[type] = v;
+                        changed();
+                        legend();
+                        const again = el.querySelector(`[data-chip="${type}"] .val`);
+                        if (again) {
+                            again.focus();
+                        }
+                        return true;
+                    };
                     for (const { type } of info.types) {
-                        const c = document.createElement('label');
+                        const c = document.createElement('div');
                         c.className = 'chip';
-                        const sw = document.createElement('span');
-                        sw.className = 'swatch';
-                        sw.style.background = `var(--c-${type})`;
-                        c.append(sw, document.createTextNode(label(type)));
-                        if (TEMP_TYPES.includes(type)) {
+                        c.dataset.chip = type;
+                        c.style.setProperty('--chip', `var(--c-${type})`);
+                        const name = document.createElement('span');
+                        name.className = 'name';
+                        name.textContent = label(type);
+                        c.appendChild(name);
+                        if (!TEMP_TYPES.includes(type)) {
+                            c.classList.add('plain');
+                            el.appendChild(c);
+                            continue;
+                        }
+                        const btn = (text, title, fn) => {
+                            const b = document.createElement('button');
+                            b.textContent = text;
+                            b.title = title;
+                            b.setAttribute('aria-label', `${label(type)} ${title}`);
+                            b.addEventListener('click', fn);
+                            return b;
+                        };
+                        const minus = btn('−', '−0,5 °C', () => setTemp(type, (temps[type] ?? 20) - 0.5));
+                        const plus = btn('+', '+0,5 °C', () => setTemp(type, (temps[type] ?? 20) + 0.5));
+                        const val = btn(fmtTemp(temps[type]) || '–', '', () => edit());
+                        val.className = 'val';
+                        val.setAttribute('aria-label', `${label(type)} ${fmtTemp(temps[type])}`);
+                        val.addEventListener('keydown', ev => {
+                            if (ev.key === 'ArrowUp' || ev.key === 'ArrowRight') {
+                                ev.preventDefault();
+                                setTemp(type, (temps[type] ?? 20) + 0.5);
+                            } else if (ev.key === 'ArrowDown' || ev.key === 'ArrowLeft') {
+                                ev.preventDefault();
+                                setTemp(type, (temps[type] ?? 20) - 0.5);
+                            }
+                        });
+                        const edit = () => {
                             const inp = document.createElement('input');
-                            inp.type = 'number';
-                            inp.min = '5';
-                            inp.max = '35';
-                            inp.step = '0.5';
-                            inp.value = temps[type] ?? '';
+                            inp.type = 'text';
+                            inp.inputMode = 'decimal';
+                            inp.value = String(temps[type] ?? '').replace('.', ',');
                             inp.setAttribute('aria-label', `${label(type)} °C`);
-                            inp.addEventListener('change', () => {
-                                const v = Math.round(Number(inp.value) * 2) / 2;
-                                if (isFinite(v) && v >= 5 && v <= 35) {
-                                    temps[type] = v;
-                                    inp.value = String(v);
-                                    changed();
-                                } else {
-                                    inp.value = temps[type] ?? '';
+                            let done = false;
+                            const finish = take => {
+                                if (done) {
+                                    return;
+                                }
+                                done = true;
+                                if (!take || !setTemp(type, String(inp.value).replace(',', '.'))) {
+                                    legend();
+                                }
+                            };
+                            inp.addEventListener('keydown', ev => {
+                                if (ev.key === 'Enter') {
+                                    finish(true);
+                                } else if (ev.key === 'Escape') {
+                                    ev.stopPropagation();
+                                    finish(false);
                                 }
                             });
-                            c.append(inp, document.createTextNode('°C'));
-                        }
+                            inp.addEventListener('blur', () => finish(true));
+                            val.replaceWith(inp);
+                            inp.focus();
+                            inp.select();
+                        };
+                        c.append(minus, val, plus);
                         el.appendChild(c);
                     }
                 }

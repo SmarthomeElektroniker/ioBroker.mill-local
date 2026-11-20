@@ -285,4 +285,43 @@ describe('week grid (admin/weekly.html) in a browser', function () {
         assert.strictEqual(m[0].chooser, true);
         await page.key('Escape');
     });
+    it('temperature chips: −/+ by 0.5 °C, click on the value edits it, Esc cancels', async () => {
+        const temp = async () => (await lastDraft()).temps.Comfort;
+        await page.evaluate('document.querySelector(\'[data-chip="Comfort"] button:last-child\').click()');
+        await sleep(400);
+        assert.strictEqual(await temp(), 22.5);
+        await page.evaluate('document.querySelector(\'[data-chip="Comfort"] button\').click()');
+        await sleep(400);
+        assert.strictEqual(await temp(), 22);
+        await page.evaluate('document.querySelector(\'[data-chip="Comfort"] .val\').click()');
+        assert.strictEqual(await page.evaluate('document.activeElement.tagName'), 'INPUT');
+        assert.strictEqual(
+            await page.evaluate('document.querySelector(\'[data-chip="Comfort"] select, input[type=number]\')'),
+            null,
+        );
+        await page.evaluate("document.activeElement.value = '19,5'");
+        await page.key('Enter');
+        await sleep(400);
+        assert.strictEqual(await temp(), 19.5);
+        assert.ok(
+            (await page.evaluate('document.querySelector(\'[data-chip="Comfort"] .val\').textContent')).includes(
+                '19,5',
+            ),
+        );
+        await page.evaluate('document.querySelector(\'[data-chip="Comfort"] .val\').click()');
+        await page.evaluate("document.activeElement.value = '30'");
+        await page.key('Escape');
+        await sleep(300);
+        assert.strictEqual(await temp(), 19.5, 'Escape keeps the value');
+        // out of range: refused
+        await page.evaluate('document.querySelector(\'[data-chip="Comfort"] .val\').click()');
+        await page.evaluate("document.activeElement.value = '50'");
+        await page.key('Enter');
+        await sleep(300);
+        assert.strictEqual(await temp(), 19.5);
+        // the blocks show the new temperature
+        assert.ok(
+            await page.evaluate("[...document.querySelectorAll('.block')].some(b => b.textContent.includes('19,5'))"),
+        );
+    });
 });

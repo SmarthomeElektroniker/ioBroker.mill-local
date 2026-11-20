@@ -213,7 +213,7 @@ describe('device manager', () => {
         assert.ok(render(items.energyToday.text.func.de, 1.234).includes('>1,23<'));
         assert.ok(render(items.energyToday.text.func.en, 1.234).includes('>1.23<'));
         assert.ok(render(items.temperature.text.func.de, 20.62).includes('>20,6<'));
-        assert.ok(render(items.power.text.func.de, 0).includes('Heizleistung'));
+        assert.ok(render(items.power.text.func.de, 0).includes('Leistung aktuell'));
 
         // operation mode and target temperature: usable, also while the heater is off
         const mode = items.operationMode;

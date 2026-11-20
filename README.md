@@ -92,7 +92,7 @@ on start.
 The instance supports the ioBroker **device manager** (tab *Devices* in admin). Each configured device gets a
 card for the **running operation** only: name and model, reachability, the fault report of the device as a
 warning, an *open window detected* indicator, room temperature, humidity (sockets), operation mode, target
-temperature, heating power (W) and the estimated energy of today. All values are on the card itself.
+temperature, current power (W) and the estimated energy of today. All values are on the card itself.
 
 - **On/off** is a toggle in the status line; its symbol and text follow the state
   `status.switchedOn` (off = operation mode *Off*, or *Switch* with the relay open). A click asks for
