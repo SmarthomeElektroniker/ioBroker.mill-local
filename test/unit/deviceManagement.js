@@ -8,12 +8,21 @@
 const assert = require('node:assert');
 const { EventEmitter } = require('node:events');
 const { definitionsFor } = require('../../lib/states');
-const { MillDeviceManagement, MODE_OPTIONS, toggleTarget, numberLineHtml } = require('../../lib/deviceManagement');
+const {
+    MillDeviceManagement,
+    MODE_OPTIONS,
+    toggleTarget,
+    numberLineHtml,
+    weeklyForm,
+    weeklyFromForm,
+} = require('../../lib/deviceManagement');
 const TEXT = require('../../lib/dmTexts');
 
 const NS = 'mill-local.0';
 const MAC = 'aabbccddeeff';
 const LANGUAGES = ['en', 'de', 'ru', 'pt', 'nl', 'fr', 'it', 'es', 'pl', 'uk', 'zh-cn'];
+/** Words that are the same in English and in these languages (checked, not forgotten) */
+const SAME_AS_EN = { Normal: ['de', 'pt', 'fr', 'es'], Comfort: ['nl', 'it'] };
 /** Action/control IDs that would be configuration tasks - none of them may appear on a card */
 const CONFIG_IDS = ['add', 'new', 'newDevice', 'discover', 'search', 'delete', 'pair', 'pairDevice', 'unpair'];
 
@@ -158,10 +167,10 @@ describe('device manager', () => {
         assert.strictEqual(card.status.warning.stateId, `${NS}.${MAC}.info.operationKey`);
         // no control dialog: the admin never asks for a control state
         assert.ok(!card.controls || card.controls.length === 0);
-        // only the toggle, no refresh button
+        // the toggle and the weekly program of the thermostat, no refresh button, no configuration
         assert.deepStrictEqual(
             card.actions.map(x => x.id),
-            ['powerToggle'],
+            ['powerToggle', 'weeklyProgram'],
         );
         assert.deepStrictEqual(
             card.indicators.map(i => i.id),
@@ -362,11 +371,61 @@ describe('device manager', () => {
         for (const [key, t] of Object.entries(TEXT)) {
             for (const l of LANGUAGES) {
                 assert.ok(t[l], `${key}: ${l} missing`);
-                if (l !== 'en') {
+                if (l !== 'en' && !(SAME_AS_EN[key] || []).includes(l)) {
                     assert.notStrictEqual(t[l], t.en, `${key}: ${l} is not translated`);
                 }
             }
         }
         assert.ok(MODE_OPTIONS.every(o => typeof o.label === 'object'));
+    });
+    describe('weekly program dialog', () => {
+        it('form: table with day, time and period, hint with the temperatures in every language', () => {
+            const form = weeklyForm({ Comfort: 22, Sleep: 18, Away: 15, Normal: 20 });
+            const table = form.items.entries;
+            assert.strictEqual(table.type, 'table');
+            assert.deepStrictEqual(
+                table.items.map(i => i.attr),
+                ['day', 'time', 'type'],
+            );
+            assert.strictEqual(table.items[0].options.length, 7);
+            assert.deepStrictEqual(
+                table.items[2].options.map(o => o.value),
+                ['Comfort', 'Sleep', 'Away', 'Normal', 'Off', 'AlwaysHeating'],
+            );
+            assert.ok(form.items.hint.text.de.includes('Komfort 22 °C'));
+            assert.ok(form.items.hint.text.en.includes('Normal 20 °C'));
+            for (const l of LANGUAGES) {
+                assert.ok(!/\{(Comfort|Sleep|Away|Normal)\}/.test(form.items.hint.text[l]), l);
+            }
+            // the validator of the time column (evaluated by the admin with "data")
+            // eslint-disable-next-line no-new-func
+            const valid = new Function('data', `return ${table.items[1].validator}`);
+            assert.strictEqual(valid({ time: '06:30' }), true);
+            assert.strictEqual(valid({ time: '6:30' }), true);
+            assert.strictEqual(valid({ time: '24:00' }), false);
+            assert.strictEqual(valid({ time: '' }), false);
+        });
+
+        it('rows -> settings.weeklyProgram: sorted, validated like the state', () => {
+            assert.strictEqual(
+                weeklyFromForm([
+                    { day: 'Tue', time: '22:00', type: 'Sleep' },
+                    { day: 'Mon', time: ' 6:30', type: 'Comfort' },
+                ]),
+                '[{"day":"Mon","time":"06:30","type":"Comfort"},{"day":"Tue","time":"22:00","type":"Sleep"}]',
+            );
+            assert.strictEqual(weeklyFromForm([]), '[]');
+            assert.strictEqual(weeklyFromForm(undefined), '[]');
+            assert.throws(() => weeklyFromForm([{ day: 'Mon', time: '25:00', type: 'Comfort' }]), /invalid time/);
+            assert.throws(
+                () =>
+                    weeklyFromForm([
+                        { day: 'Mon', time: '06:00', type: 'Comfort' },
+                        { day: 'Mon', time: '06:00', type: 'Sleep' },
+                    ]),
+                /two entries/,
+            );
+            assert.throws(() => weeklyFromForm([{ day: 'Mon', time: '06:00', type: 'Party' }]), /invalid type/);
+        });
     });
 });
