@@ -95,7 +95,7 @@
     "left": "48px",
     "top": "140px",
     "width": "281px",
-    "height": "300px",
+    "height": "272px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"
@@ -124,7 +124,7 @@
     "left": "349px",
     "top": "140px",
     "width": "281px",
-    "height": "300px",
+    "height": "272px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"
@@ -153,7 +153,7 @@
     "left": "650px",
     "top": "140px",
     "width": "281px",
-    "height": "300px",
+    "height": "272px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"
@@ -182,7 +182,7 @@
     "left": "951px",
     "top": "140px",
     "width": "281px",
-    "height": "300px",
+    "height": "272px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"
@@ -211,7 +211,7 @@
    },
    "style": {
     "left": "48px",
-    "top": "468px",
+    "top": "440px",
     "width": "1184px",
     "height": "226px",
     "z-index": "5"

@@ -791,10 +791,11 @@
                         timeout: 20000,
                         count: 50000,
                     };
-                    // raw values: averages would invent values and smooth away the peaks of the power
-                    if (range === '7d' && (k === 'temp' || k === 'hum' || k === 'power')) {
-                        opts.aggregate = 'minmax';
-                        opts.step = 15 * 60000;
+                    // 24 h: the raw values (an aggregation would invent values and smooth the peaks away);
+                    // 7 days: the mean per hour of the recorded values, the target stays raw (step line)
+                    if (range === '7d' && k !== 'target') {
+                        opts.aggregate = 'average';
+                        opts.step = 3600000;
                     } else {
                         opts.aggregate = 'none';
                     }
@@ -944,7 +945,10 @@
             var leg = [
                 ['temp', b.t('Room temperature')],
                 ['target', b.t('Target')],
-                ['power', b.t('Current power')],
+                [
+                    'power',
+                    range === '7d' ? b.t('Current power') + ' (' + b.t('hourly mean') + ')' : b.t('Current power'),
+                ],
             ];
             if (hasHum) {
                 leg.push(['hum', b.t('Humidity')]);

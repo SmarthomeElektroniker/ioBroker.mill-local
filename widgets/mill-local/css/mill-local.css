@@ -538,3 +538,11 @@
 .mlv-hnote {
     font-size: 12px;
 }
+@media (max-width: 500px) {
+    .mlv-page {
+        padding: 24px 16px;
+    }
+    .mlv-page h1 {
+        font-size: 26px;
+    }
+}

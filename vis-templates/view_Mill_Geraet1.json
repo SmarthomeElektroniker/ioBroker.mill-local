@@ -116,9 +116,9 @@
    },
    "style": {
     "left": "48px",
-    "top": "446px",
+    "top": "444px",
     "width": "360px",
-    "height": "190px",
+    "height": "212px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"
@@ -144,7 +144,7 @@
    },
    "style": {
     "left": "48px",
-    "top": "652px",
+    "top": "672px",
     "width": "360px",
     "height": "80px",
     "z-index": "5"
