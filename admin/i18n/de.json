@@ -28,7 +28,7 @@
   "labelTimeout": "Zeitlimit je Anfrage",
   "helpTimeout": "Ein Gerät gilt nach drei fehlgeschlagenen Abfragen in Folge als nicht erreichbar.",
   "headerControl": "Steuerung",
-  "textControl": "Ab Werk ein. Jeder Wert gibt es nur einmal und zeigt den Gerätewert; control.* und settings.* sind direkt beschreibbar (auch Wochenprogramm, Timer und Urlaub als JSON) und werden vor dem Senden geprüft. EIN schaltet immer ein: manueller Modus 'Switch', Relais an – unabhängig von Thermostat, Wochenprogramm und Solltemperatur. AUS schaltet immer aus: in 'Switch' öffnet das Relais, in jeder anderen Betriebsart geht das Gerät auf 'Off'. Um wieder nach Thermostat zu heizen, eine Betriebsart wie 'Control individually' wählen.",
+  "textControl": "control.power ist Ein/Aus des Thermostats: EIN kehrt in die letzte Thermostat-Betriebsart zurück, AUS setzt die Betriebsart 'Off'. Dauerheizen nur in der Betriebsart 'Switch'.",
   "labelAllowControl": "Steuerung einschalten (Schreibbefehle)",
   "helpAllowControl": "Ausgeschaltet sind control.* und settings.* nur lesbar.",
   "headerApiKey": "API-Schlüssel (optional)",

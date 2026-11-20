@@ -28,7 +28,7 @@
   "labelTimeout": "Request timeout",
   "helpTimeout": "A device counts as offline after three failed polls in a row.",
   "headerControl": "Control",
-  "textControl": "On by default. Every value exists once and shows the device value; control.* and settings.* can be written directly (incl. weekly program, timers and vacation as JSON) and are checked before sending. ON always switches on: manual mode 'Switch', relay closed, regardless of thermostat, weekly program and target temperature. OFF always switches off: in 'Switch' the relay opens, in every other mode the device goes to 'Off'. To heat by thermostat again, choose an operation mode such as 'Control individually'.",
+  "textControl": "control.power is the on/off of the thermostat: ON returns to the last thermostat mode, OFF sets the mode Off. Permanent heating only in the operation mode 'Switch'.",
   "labelAllowControl": "Enable control (write commands)",
   "helpAllowControl": "Switching it off makes control.* and settings.* read-only.",
   "headerApiKey": "API key (optional)",

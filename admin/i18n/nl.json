@@ -28,7 +28,7 @@
   "labelTimeout": "Time-out per verzoek",
   "helpTimeout": "Een apparaat geldt na drie mislukte opvragingen op rij als offline.",
   "headerControl": "Bediening",
-  "textControl": "Standaard aan. Elke waarde bestaat één keer en toont de apparaatwaarde; control.* en settings.* zijn direct schrijfbaar (ook weekprogramma, timers en vakantie als JSON) en worden vóór verzending gecontroleerd. AAN schakelt altijd in: handmatige modus 'Switch', relais gesloten, ongeacht thermostaat, weekprogramma en doeltemperatuur. UIT schakelt altijd uit: in 'Switch' opent het relais, in elke andere modus gaat het apparaat naar 'Off'. Om weer op de thermostaat te verwarmen, kies een modus zoals 'Control individually'.",
+  "textControl": "control.power is aan/uit van de thermostaat: AAN keert terug naar de laatste thermostaatmodus, UIT zet de modus 'Off'. Permanent verwarmen alleen in de modus 'Switch'.",
   "labelAllowControl": "Bediening inschakelen (schrijfopdrachten)",
   "helpAllowControl": "Uitgeschakeld zijn control.* en settings.* alleen-lezen.",
   "headerApiKey": "API-sleutel (optioneel)",

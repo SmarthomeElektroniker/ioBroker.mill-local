@@ -28,7 +28,7 @@
   "labelTimeout": "Tempo limite do pedido",
   "helpTimeout": "Um dispositivo é considerado offline após três consultas falhadas seguidas.",
   "headerControl": "Controlo",
-  "textControl": "Ligado por omissão. Cada valor existe uma vez e mostra o valor do dispositivo; control.* e settings.* podem ser escritos diretamente (incl. programa semanal, temporizadores e férias em JSON) e são verificados antes do envio. LIGAR liga sempre: modo manual 'Switch', relé fechado, independentemente do termóstato, do programa semanal e da temperatura alvo. DESLIGAR desliga sempre: em 'Switch' o relé abre, em qualquer outro modo o dispositivo passa a 'Off'. Para voltar a aquecer pelo termóstato, escolha um modo como 'Control individually'.",
+  "textControl": "control.power é o ligar/desligar do termóstato: LIGAR volta ao último modo de termóstato, DESLIGAR define o modo 'Off'. Aquecimento permanente só no modo 'Switch'.",
   "labelAllowControl": "Ativar controlo (comandos de escrita)",
   "helpAllowControl": "Desligado, control.* e settings.* ficam só de leitura.",
   "headerApiKey": "Chave API (opcional)",

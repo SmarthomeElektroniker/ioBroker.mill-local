@@ -28,7 +28,7 @@
   "labelTimeout": "Timeout richiesta",
   "helpTimeout": "Un dispositivo è considerato offline dopo tre interrogazioni fallite di seguito.",
   "headerControl": "Controllo",
-  "textControl": "Attivo per impostazione predefinita. Ogni valore esiste una sola volta e mostra il valore del dispositivo; control.* e settings.* sono scrivibili direttamente (incl. programma settimanale, timer e vacanza in JSON) e vengono verificati prima dell'invio. ACCESO accende sempre: modalità manuale 'Switch', relè chiuso, indipendentemente da termostato, programma settimanale e temperatura obiettivo. SPENTO spegne sempre: in 'Switch' il relè si apre, in ogni altra modalità il dispositivo passa a 'Off'. Per riscaldare di nuovo con il termostato, scegliere una modalità come 'Control individually'.",
+  "textControl": "control.power è l'acceso/spento del termostato: ACCESO torna all'ultima modalità termostato, SPENTO imposta la modalità 'Off'. Riscaldamento permanente solo nella modalità 'Switch'.",
   "labelAllowControl": "Attiva controllo (comandi di scrittura)",
   "helpAllowControl": "Disattivato, control.* e settings.* sono di sola lettura.",
   "headerApiKey": "Chiave API (facoltativa)",

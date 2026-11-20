@@ -28,7 +28,7 @@
   "labelTimeout": "请求超时",
   "helpTimeout": "连续三次轮询失败后，设备视为离线。",
   "headerControl": "控制",
-  "textControl": "默认开启。每个值只出现一次并显示设备实际值；control.* 和 settings.* 可直接写入（包括以 JSON 表示的周程序、定时器和假期），发送前会进行检查。“开”总是接通：进入手动模式“Switch”，继电器闭合，不受恒温器、周程序和目标温度影响。“关”总是断开：在“Switch”中继电器断开，在其他任何模式下设备切换到“Off”。若要重新按恒温器加热，请选择“Control individually”等运行模式。",
+  "textControl": "control.power 是恒温器的开/关：开启回到上一次的恒温模式，关闭设置为 'Off' 模式。持续加热仅在 'Switch' 模式下。",
   "labelAllowControl": "启用控制（写入命令）",
   "helpAllowControl": "关闭后 control.* 和 settings.* 为只读。",
   "headerApiKey": "API 密钥（可选）",

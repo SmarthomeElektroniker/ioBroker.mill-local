@@ -28,7 +28,7 @@
   "labelTimeout": "Délai d'attente par requête",
   "helpTimeout": "Un appareil est considéré hors ligne après trois interrogations échouées consécutives.",
   "headerControl": "Commande",
-  "textControl": "Activé par défaut. Chaque valeur existe une seule fois et affiche la valeur de l'appareil ; control.* et settings.* sont directement inscriptibles (y compris programme hebdomadaire, minuteries et vacances en JSON) et vérifiés avant l'envoi. MARCHE allume toujours : mode manuel « Switch », relais fermé, quels que soient le thermostat, le programme hebdomadaire et la consigne. ARRÊT éteint toujours : en « Switch » le relais s'ouvre, dans tout autre mode l'appareil passe en « Off ». Pour chauffer de nouveau selon le thermostat, choisissez un mode tel que « Control individually ».",
+  "textControl": "control.power est la marche/arrêt du thermostat : MARCHE revient au dernier mode thermostat, ARRÊT règle le mode 'Off'. Chauffage permanent uniquement dans le mode 'Switch'.",
   "labelAllowControl": "Activer la commande (écriture)",
   "helpAllowControl": "Désactivé, control.* et settings.* sont en lecture seule.",
   "headerApiKey": "Clé API (facultative)",

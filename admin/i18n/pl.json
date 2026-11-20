@@ -28,7 +28,7 @@
   "labelTimeout": "Limit czasu żądania",
   "helpTimeout": "Urządzenie uznaje się za niedostępne po trzech kolejnych nieudanych odpytaniach.",
   "headerControl": "Sterowanie",
-  "textControl": "Domyślnie włączone. Każda wartość istnieje raz i pokazuje wartość urządzenia; control.* i settings.* można zapisywać bezpośrednio (także program tygodniowy, timery i urlop jako JSON), są sprawdzane przed wysłaniem. WŁ. zawsze włącza: tryb ręczny „Switch”, przekaźnik zwarty, niezależnie od termostatu, programu tygodniowego i temperatury zadanej. WYŁ. zawsze wyłącza: w „Switch” przekaźnik się rozwiera, w każdym innym trybie urządzenie przechodzi w „Off”. Aby znów grzać według termostatu, wybierz tryb, np. „Control individually”.",
+  "textControl": "control.power to włącz/wyłącz termostatu: WŁĄCZ wraca do ostatniego trybu termostatu, WYŁĄCZ ustawia tryb 'Off'. Ciągłe grzanie tylko w trybie 'Switch'.",
   "labelAllowControl": "Włącz sterowanie (polecenia zapisu)",
   "helpAllowControl": "Po wyłączeniu control.* i settings.* są tylko do odczytu.",
   "headerApiKey": "Klucz API (opcjonalnie)",
