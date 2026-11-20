@@ -102,10 +102,12 @@ temperature, heating power (W) and the estimated energy of today. All values are
 - **Operation mode** (select) and **target temperature** (slider, sent once it rests for 1 s) stay usable
   while the heater is off; choosing a mode other than *Off* switches it on.
 
-- **Weekly program** (calendar button): a dialog with the switching points of the device (day, time, period
-  Comfort / Sleep / Away / Normal / Off / Always heating) and the current temperatures of the periods. *Apply* writes
-  `settings.weeklyProgram`; with *Run the weekly program now* it also sets the operation mode *Weekly program*.
-  The device runs the program itself and needs the correct time (see *Time, weekly program …* below).
+- **Weekly program** (calendar button): a week grid, one row per weekday from 0 to 24 h; every block is a period
+  with its temperature, e.g. *Comfort (22 °C)*. Drag a border (15-minute steps; with the keyboard: arrow keys, Shift
+  = 1 h, Delete removes it), click a block to change its period or to split it, double-click to split at that point,
+  copy and paste whole days. The temperatures of Comfort, Sleep, Away and Normal can be changed in the legend.
+  *OK* writes the program (at most 64 switching points); if the device does not run the weekly program yet, the
+  adapter asks whether to activate it. The page is plain HTML (`admin/weekly.html`) in the dialog.
 
 Controls exist only while control is enabled. The card writes the existing states (ack=false), so the same
 validation applies as for scripts – only the documented operation modes are ever sent.
@@ -291,8 +293,8 @@ account or the cloud.
 - (Immanuel) Clear warnings for invalid timing settings; empty or invalid answers keep the last values; the
   shutdown aborts the running request and drops queued commands.
 - (Immanuel) Takeover from ioBroker.millheater (button in the instance settings), migration table in the README.
-- (Immanuel) Weekly program dialog on the device card (switching points as a table, optionally switches to the
-  operation mode *Weekly program*).
+- (Immanuel) Weekly program on the device card as a week grid: draggable switching points, periods with their
+  temperatures, copy/paste days, keyboard operation; asks after OK whether to activate the weekly program.
 - (Immanuel) Unknown reported operation modes (e.g. `Invalid`) count as off and are logged once.
 - (Immanuel) Admin form: timing values are checked (ranges, timeout shorter than the polling interval) and not
   saved while invalid.

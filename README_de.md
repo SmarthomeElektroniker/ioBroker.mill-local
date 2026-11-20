@@ -43,9 +43,10 @@ Geräteart wird automatisch erkannt, Netzwerksuche und Wiederfinden nach Adressw
   (folgt dem Datenpunkt `status.switchedOn`; „Ein“ kehrt in die letzte Thermostat-Betriebsart zurück, in `Switch`
   schaltet er das Relais).
   Betriebsart und Solltemperatur sind auch im ausgeschalteten Zustand bedienbar, eine Betriebsart außer „Aus“
-  schaltet ein (alles nur bei eingeschalteter Steuerung). **Wochenprogramm** (Kalender-Knopf): Dialog mit den
-  Schaltpunkten (Tag, Uhrzeit, Abschnitt Komfort/Schlafen/Abwesend/Normal/Aus/Dauerheizen) und den aktuellen
-  Temperaturen; auf Wunsch wird gleich die Betriebsart „Wochenprogramm“ gesetzt. Bewusst keine Konfiguration auf
+  schaltet ein (alles nur bei eingeschalteter Steuerung). **Wochenprogramm** (Kalender-Knopf): Wochenraster Mo–So,
+  0–24 Uhr, Blöcke je Abschnitt mit Temperatur (z. B. „Komfort (22 °C)“); Grenzen ziehen (15 min, Tastatur: Pfeile),
+  Block anklicken zum Ändern/Teilen, Tage kopieren; Temperaturen der Abschnitte in der Legende. Nach OK fragt der
+  Adapter, ob das Wochenprogramm aktiviert werden soll. Bewusst keine Konfiguration auf
   den Karten – Geräte werden weiter in den Instanzeinstellungen eingetragen.
 - Eine unbekannte gemeldete Betriebsart (die API-Beschreibung nennt `Invalid`) wird angezeigt, zählt als aus und
   wird einmal gewarnt; gesendet wird sie nie.
