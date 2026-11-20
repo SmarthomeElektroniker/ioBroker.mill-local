@@ -174,7 +174,7 @@
     "left": "432px",
     "top": "36px",
     "width": "800px",
-    "height": "420px",
+    "height": "440px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"
@@ -202,9 +202,9 @@
    },
    "style": {
     "left": "432px",
-    "top": "476px",
+    "top": "492px",
     "width": "800px",
-    "height": "290px",
+    "height": "276px",
     "z-index": "5"
    },
    "widgetSet": "mill-local"

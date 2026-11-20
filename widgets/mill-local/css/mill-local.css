@@ -340,8 +340,8 @@
 .mlv-wgrid {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 18px 20px;
+    gap: 9px;
+    padding: 14px 20px;
 }
 .mlv-wrow {
     display: grid;
@@ -358,7 +358,7 @@
 .mlv-band {
     position: relative;
     display: flex;
-    height: 34px;
+    height: 30px;
     border-radius: 8px;
     overflow: hidden;
     gap: 2px;
