@@ -179,7 +179,10 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 4,
-                    "xl": 4
+                    "xl": 4,
+                    "validator": "Number.isInteger(data.pollInterval) && data.pollInterval >= 10 && data.pollInterval <= 3600 && data.pollInterval > (data.timeout || 5)",
+                    "validatorErrorText": "errPollInterval",
+                    "validatorNoSaveOnError": true
                 },
                 "slowInterval": {
                     "type": "number",
@@ -193,7 +196,10 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 4,
-                    "xl": 4
+                    "xl": 4,
+                    "validator": "Number.isInteger(data.slowInterval) && data.slowInterval >= 60 && data.slowInterval <= 86400 && data.slowInterval >= (data.pollInterval || 30)",
+                    "validatorErrorText": "errSlowInterval",
+                    "validatorNoSaveOnError": true
                 },
                 "timeout": {
                     "type": "number",
@@ -208,7 +214,10 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 4,
-                    "xl": 4
+                    "xl": 4,
+                    "validator": "Number.isInteger(data.timeout) && data.timeout >= 1 && data.timeout <= 30 && data.timeout < (data.pollInterval || 30)",
+                    "validatorErrorText": "errTimeout",
+                    "validatorNoSaveOnError": true
                 }
             }
         },

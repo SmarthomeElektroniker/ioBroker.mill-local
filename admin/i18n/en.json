@@ -46,5 +46,8 @@
   "labelSyncTimezone": "Keep the device's time zone in line with ioBroker",
   "helpSyncTimezone": "Needed for weekly program, timers and vacation; follows daylight saving time. The device takes the time itself via NTP from pool.ntp.org – without internet point that name to a local NTP server (e.g. a DNS rewrite).",
   "btnImportMillheater": "Take over from millheater",
-  "helpImportMillheater": "Reads the instances of ioBroker.millheater (address, MAC, intervals) and fills the device table. Save afterwards and stop millheater."
+  "helpImportMillheater": "Reads the instances of ioBroker.millheater (address, MAC, intervals) and fills the device table. Save afterwards and stop millheater.",
+  "errPollInterval": "Whole seconds from 10 to 3600, longer than the request timeout",
+  "errSlowInterval": "Whole seconds from 60 to 86400, not shorter than the polling interval",
+  "errTimeout": "Whole seconds from 1 to 30, shorter than the polling interval"
 }

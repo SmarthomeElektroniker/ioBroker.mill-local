@@ -46,5 +46,8 @@
   "labelSyncTimezone": "Tijdzone van het apparaat gelijk houden aan ioBroker",
   "helpSyncTimezone": "Nodig voor weekprogramma, timers en vakantie; volgt de zomertijd. De tijd haalt het apparaat zelf via NTP van pool.ntp.org – zonder internet die naam naar een lokale NTP-server leiden (bijv. DNS-herschrijving).",
   "btnImportMillheater": "Overnemen uit millheater",
-  "helpImportMillheater": "Leest de instanties van ioBroker.millheater (adres, MAC, intervallen) en vult de apparatentabel. Daarna opslaan en millheater stoppen."
+  "helpImportMillheater": "Leest de instanties van ioBroker.millheater (adres, MAC, intervallen) en vult de apparatentabel. Daarna opslaan en millheater stoppen.",
+  "errPollInterval": "Hele seconden van 10 tot 3600, langer dan de time-out van het verzoek",
+  "errSlowInterval": "Hele seconden van 60 tot 86400, niet korter dan het pollinginterval",
+  "errTimeout": "Hele seconden van 1 tot 30, korter dan het pollinginterval"
 }

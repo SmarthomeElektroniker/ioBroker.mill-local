@@ -46,5 +46,8 @@
   "labelSyncTimezone": "Dopasuj strefę czasową urządzenia do ioBroker",
   "helpSyncTimezone": "Potrzebne do programu tygodniowego, timerów i urlopu; uwzględnia czas letni. Czas urządzenie pobiera samo przez NTP z pool.ntp.org – bez internetu przekieruj tę nazwę na lokalny serwer NTP (np. przepisanie DNS).",
   "btnImportMillheater": "Przejmij z millheater",
-  "helpImportMillheater": "Odczytuje instancje ioBroker.millheater (adres, MAC, interwały) i wypełnia tabelę urządzeń. Następnie zapisz i zatrzymaj millheater."
+  "helpImportMillheater": "Odczytuje instancje ioBroker.millheater (adres, MAC, interwały) i wypełnia tabelę urządzeń. Następnie zapisz i zatrzymaj millheater.",
+  "errPollInterval": "Pełne sekundy od 10 do 3600, dłużej niż limit czasu żądania",
+  "errSlowInterval": "Pełne sekundy od 60 do 86400, nie krócej niż interwał odpytywania",
+  "errTimeout": "Pełne sekundy od 1 do 30, krócej niż interwał odpytywania"
 }

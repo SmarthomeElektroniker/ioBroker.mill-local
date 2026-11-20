@@ -46,5 +46,8 @@
   "labelSyncTimezone": "Aligner le fuseau horaire de l'appareil sur ioBroker",
   "helpSyncTimezone": "Nécessaire pour le programme hebdomadaire, les minuteries et les vacances ; suit l'heure d'été. L'appareil obtient l'heure lui-même par NTP depuis pool.ntp.org – sans Internet, redirigez ce nom vers un serveur NTP local (p. ex. réécriture DNS).",
   "btnImportMillheater": "Reprendre depuis millheater",
-  "helpImportMillheater": "Lit les instances de ioBroker.millheater (adresse, MAC, intervalles) et remplit la table des appareils. Enregistrez ensuite et arrêtez millheater."
+  "helpImportMillheater": "Lit les instances de ioBroker.millheater (adresse, MAC, intervalles) et remplit la table des appareils. Enregistrez ensuite et arrêtez millheater.",
+  "errPollInterval": "Secondes entières de 10 à 3600, plus long que le délai de réponse",
+  "errSlowInterval": "Secondes entières de 60 à 86400, pas plus court que l'intervalle d'interrogation",
+  "errTimeout": "Secondes entières de 1 à 30, plus court que l'intervalle d'interrogation"
 }

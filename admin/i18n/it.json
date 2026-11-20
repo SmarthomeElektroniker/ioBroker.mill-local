@@ -46,5 +46,8 @@
   "labelSyncTimezone": "Allinea il fuso orario del dispositivo a ioBroker",
   "helpSyncTimezone": "Necessario per programma settimanale, timer e vacanza; segue l'ora legale. Il dispositivo ottiene l'ora da solo via NTP da pool.ntp.org – senza Internet indirizzare questo nome a un server NTP locale (ad es. riscrittura DNS).",
   "btnImportMillheater": "Importa da millheater",
-  "helpImportMillheater": "Legge le istanze di ioBroker.millheater (indirizzo, MAC, intervalli) e compila la tabella dei dispositivi. Poi salvare e fermare millheater."
+  "helpImportMillheater": "Legge le istanze di ioBroker.millheater (indirizzo, MAC, intervalli) e compila la tabella dei dispositivi. Poi salvare e fermare millheater.",
+  "errPollInterval": "Secondi interi da 10 a 3600, più lungo del timeout della richiesta",
+  "errSlowInterval": "Secondi interi da 60 a 86400, non più breve dell'intervallo di interrogazione",
+  "errTimeout": "Secondi interi da 1 a 30, più breve dell'intervallo di interrogazione"
 }
