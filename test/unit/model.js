@@ -91,3 +91,14 @@ describe('schedule.lastTimerType', () => {
         assert.strictEqual(lastTimerType(timers, -600, now), '');
     });
 });
+
+describe('schedule.localOffset', () => {
+    const assert = require('node:assert');
+    const { localOffset } = require('../../lib/schedule');
+    it('never returns -0 (UTC hosts)', () => {
+        const utc = { getTimezoneOffset: () => 0 };
+        assert.ok(Object.is(localOffset(utc), 0));
+        assert.strictEqual(localOffset({ getTimezoneOffset: () => -60 }), 60);
+        assert.strictEqual(localOffset({ getTimezoneOffset: () => 330 }), -330);
+    });
+});

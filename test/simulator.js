@@ -82,7 +82,7 @@ const DEVICES = [
 ];
 
 async function main() {
-    const tz = -new Date().getTimezoneOffset();
+    const tz = -new Date().getTimezoneOffset() || 0;
     const fakes = [];
     for (const [i, d] of DEVICES.entries()) {
         const f = await createFakeMill({ ...d, port: BASE + 1 + i, bind: BIND, physics: true });

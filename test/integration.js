@@ -461,7 +461,7 @@ tests.integration(path.join(__dirname, '..'), {
                 await waitFor(`${id('socket')}.status.heating`, v => v === true);
 
                 // 2. weekly program via the dialog of the device card, then the device follows its clock
-                const tz = -new Date().getTimezoneOffset();
+                const tz = -new Date().getTimezoneOffset() || 0;
                 await waitFor(`${id('panel')}.settings.timezoneOffset`, v => v === tz);
                 assert.strictEqual(fakes.panel.state.timezone, tz, 'time zone of the device set from the host');
                 await harness.enableSendTo();
