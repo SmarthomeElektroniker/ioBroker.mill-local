@@ -6,10 +6,16 @@
         <title>Mill weekly program</title>
         <!--
             Week grid of the weekly program (device manager dialog of mill-local, loaded as iframe).
-            One row per weekday, 0-24 h; every block is a period (Comfort, Sleep, ...). Borders are switching
-            points: drag them (15-min steps) or move them with the arrow keys; click a block to change its period,
-            double-click to split it. The page asks the adapter for the program (sendTo weeklyInfo) and sends every
-            change as a draft (sendTo weeklyDraft); the dialog's OK writes it to the device.
+            One row per weekday, 0-24 h; every block is a period with its temperature (Comfort (22 °C) ...).
+            The lines between the blocks are the switching times.
+            - click into a block: new switching time there (preview line with the time while hovering), then the
+              choice of the period opens
+            - drag a line: move the switching time (15-minute steps); click a line: change or delete it
+            - "+ switching time" per row; copy and paste a whole day
+            - keyboard: Tab to a block or line; Enter = choose the period, Insert or "+" = new switching time,
+              arrow keys move a line (Shift = 1 h), Delete removes it
+            The page asks the adapter for the program (sendTo weeklyInfo) and sends every change as a draft
+            (sendTo weeklyDraft); the dialog's OK writes it to the device.
             No external code: plain HTML, CSS and JavaScript; the socket comes from the admin (/lib/js/socket.io.js).
         -->
         <script src="../../lib/js/socket.io.js"></script>
@@ -23,12 +29,14 @@
                 --focus: #1565c0;
                 --menu: #ffffff;
                 --shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-                --c-Comfort: #ef6c00;
-                --c-Normal: #2e7d32;
-                --c-Sleep: #3949ab;
-                --c-Away: #00838f;
-                --c-Off: #757575;
-                --c-AlwaysHeating: #c62828;
+                /* calm palette, white text >= 4.5:1 (WCAG AA) on every block */
+                --block-fg: #ffffff;
+                --c-Comfort: #a3492f;
+                --c-Normal: #4a7350;
+                --c-Sleep: #3e5c8a;
+                --c-Away: #55687a;
+                --c-Off: #6b6b6b;
+                --c-AlwaysHeating: #8c2336;
                 --c-none: #bdbdbd;
             }
             body.dark {
@@ -40,12 +48,14 @@
                 --focus: #90caf9;
                 --menu: #2c2c2c;
                 --shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
-                --c-Comfort: #f57c00;
-                --c-Normal: #388e3c;
-                --c-Sleep: #5c6bc0;
-                --c-Away: #00838f;
-                --c-Off: #616161;
-                --c-AlwaysHeating: #d32f2f;
+                /* dark: lighter, muted fills with dark text (>= 6:1), blocks >= 4.7:1 against the dialog */
+                --block-fg: #161616;
+                --c-Comfort: #d4896b;
+                --c-Normal: #8fb391;
+                --c-Sleep: #8ea6cf;
+                --c-Away: #9eacb9;
+                --c-Off: #a0a0a0;
+                --c-AlwaysHeating: #d57c8c;
                 --c-none: #4a4a4a;
             }
             html,
@@ -89,7 +99,7 @@
             }
             #grid {
                 display: grid;
-                grid-template-columns: 44px 1fr 64px;
+                grid-template-columns: 44px 1fr auto;
                 row-gap: 6px;
                 column-gap: 8px;
                 align-items: center;
@@ -118,20 +128,20 @@
                 overflow: visible;
             }
             .block {
+                cursor: copy;
                 position: absolute;
                 top: 0;
                 bottom: 0;
                 border: 0;
                 margin: 0;
                 padding: 0 6px;
-                color: #fff;
+                color: var(--block-fg);
                 font: inherit;
                 font-size: 13px;
                 text-align: left;
                 overflow: hidden;
                 white-space: nowrap;
                 text-overflow: ellipsis;
-                cursor: pointer;
                 border-right: 1px solid var(--bg);
             }
             .block:first-child {
@@ -272,10 +282,87 @@
                 margin: 4px 0;
                 width: 100%;
             }
+            #hint {
+                color: var(--muted);
+                font-size: 12px;
+                margin: 0 0 6px 0;
+            }
+            .track {
+                cursor: copy;
+            }
+            .preview {
+                position: absolute;
+                top: -3px;
+                bottom: -3px;
+                width: 2px;
+                margin-left: -1px;
+                background: var(--fg);
+                opacity: 0.8;
+                pointer-events: none;
+                z-index: 4;
+            }
+            .preview span {
+                position: absolute;
+                top: -20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: var(--fg);
+                color: var(--bg);
+                font-size: 12px;
+                padding: 1px 5px;
+                border-radius: 3px;
+                white-space: nowrap;
+            }
+            .add {
+                border: 1px solid var(--line);
+                border-radius: 15px;
+                background: transparent;
+                color: var(--fg);
+                font: inherit;
+                font-size: 12px;
+                padding: 4px 10px;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .add:hover {
+                background: var(--track);
+            }
+            .add:focus-visible {
+                outline: 3px solid var(--focus);
+                outline-offset: 1px;
+            }
+            .menu button svg {
+                width: 18px;
+                height: 18px;
+                fill: currentColor;
+                flex: none;
+            }
+            .menu .danger {
+                color: #c62828;
+            }
+            body.dark .menu .danger {
+                color: #ef9a9a;
+            }
+            .menu .question {
+                padding: 6px 10px;
+                max-width: 260px;
+            }
+            .menu .row {
+                display: flex;
+                gap: 6px;
+                justify-content: flex-end;
+                padding: 4px;
+            }
+            .menu .title {
+                padding: 4px 10px 6px 10px;
+                color: var(--muted);
+                font-size: 12px;
+            }
         </style>
     </head>
     <body>
         <div id="legend"></div>
+        <div id="hint"></div>
         <div id="grid" role="grid"></div>
         <div id="status" aria-live="polite"></div>
         <script>
@@ -295,6 +382,11 @@
                 const ICON_PASTE =
                     '<svg viewBox="0 0 24 24"><path d="M19,20H5V4H7V7H17V4H19M12,2A1,1 0 0,1 13,3A1,1 0 0,1 12,4A1,1 0 0,1 11,3A1,1 0 0,1 12,2M19,2H14.82C14.4,0.84 13.3,0 12,0C10.7,0 9.6,0.84 9.18,2H5A2,2 0 0,0 3,4V20A2,2 0 0,0 5,22H19A2,2 0 0,0 21,20V4A2,2 0 0,0 19,2Z"/></svg>';
 
+                // Material Design Icons content_cut and delete (Apache 2.0)
+                const ICON_SPLIT =
+                    '<svg viewBox="0 0 24 24"><path d="M9.64 7.64c.23-.5.36-1.05.36-1.64 0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1L9.64 7.64zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm0 12c-1.1 0-2-.89-2-2s.9-2 2-2 2 .89 2 2-.9 2-2 2zm6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5.5.22.5.5-.22.5-.5.5zM19 3l-6 6 2 2 7-7V3z"/></svg>';
+                const ICON_DELETE =
+                    '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
                 let info = null;
                 let points = []; // [{m: minutes since Monday 00:00, type}]
                 let temps = {};
@@ -396,7 +488,7 @@
                         const program = sorted().map(p => ({ day: DAYS[Math.floor(p.m / DAY)], time: hhmm(p.m), type: p.type }));
                         try {
                             const r = await send('weeklyDraft', { program, temps });
-                            status(`${r.count} / ${info.max} ${info.texts['Switching points']}`);
+                            status(`${r.count} / ${info.max} ${info.texts['Switching times']}`);
                         } catch (err) {
                             status(err.message, true);
                         }
@@ -448,15 +540,19 @@
                             b.title = `${dayName(d, 'long')} ${hhmm(bl.a)}–${bl.b % DAY ? hhmm(bl.b) : '24:00'}: ${bl.type ? blockText(bl.type) : '–'}`;
                             b.setAttribute('aria-label', b.title);
                             b.dataset.key = `b${d}-${bl.a}`;
-                            b.addEventListener('click', () => openMenu(b, d, bl));
-                            b.addEventListener('dblclick', ev => split(d, bl, minuteAt(track, ev.clientX, d)));
+                            b.addEventListener('click', ev => clickBlock(ev, b, track, d, bl));
+                            b.addEventListener('keydown', ev => blockKey(ev, b, d, bl));
+                            b.addEventListener('contextmenu', ev => {
+                                ev.preventDefault();
+                                openMenuAt(b, d, bl.a, minuteAt(track, ev.clientX, d));
+                            });
                             track.appendChild(b);
                         });
                         for (const p of points.filter(x => x.m >= d * DAY && x.m < (d + 1) * DAY)) {
                             const h = document.createElement('button');
                             h.className = 'handle';
                             h.style.left = `${((p.m - d * DAY) / DAY) * 100}%`;
-                            h.title = `${dayName(d, 'long')} ${hhmm(p.m)} → ${blockText(p.type)}`;
+                            h.title = `${dayName(d, 'long')} ${hhmm(p.m)}: ${blockText(p.type)}`;
                             h.setAttribute('role', 'slider');
                             h.setAttribute('aria-label', h.title);
                             h.setAttribute('aria-valuetext', hhmm(p.m));
@@ -465,6 +561,8 @@
                             h.addEventListener('keydown', ev => handleKey(ev, d, p));
                             track.appendChild(h);
                         }
+                        track.addEventListener('pointermove', ev => preview(ev, track, d));
+                        track.addEventListener('pointerleave', () => preview(null, track, d));
                         if (d === today) {
                             const n = document.createElement('div');
                             n.className = 'now';
@@ -480,7 +578,11 @@
                         });
                         const paste = tool(ICON_PASTE, info.texts['Paste day'], () => pasteDay(d));
                         paste.disabled = !clip;
-                        tools.append(copy, paste);
+                        const add = document.createElement('button');
+                        add.className = 'add';
+                        add.textContent = info.texts['Add switching time'];
+                        add.addEventListener('click', () => addToDay(d));
+                        tools.append(add, copy, paste);
                         grid.appendChild(tools);
                     }
                     if (focusKey) {
@@ -560,8 +662,11 @@
                 }
                 function startDrag(ev, handle, track, d, p) {
                     ev.preventDefault();
+                    ev.stopPropagation();
                     handle.focus();
                     handle.classList.add('drag');
+                    preview(null, track, d);
+                    const from = p.m;
                     const tip = document.createElement('div');
                     tip.className = 'tip';
                     track.appendChild(tip);
@@ -580,14 +685,29 @@
                             }
                         });
                     };
+                    let moved = false;
+                    const onMoveTracked = e => {
+                        if (Math.abs(e.clientX - ev.clientX) > 3) {
+                            moved = true;
+                        }
+                        if (moved) {
+                            onMove(e);
+                        }
+                    };
                     const onUp = () => {
-                        window.removeEventListener('pointermove', onMove);
+                        window.removeEventListener('pointermove', onMoveTracked);
                         window.removeEventListener('pointerup', onUp);
+                        if (!moved || p.m === from) {
+                            // a click on a line: change or delete this switching time
+                            tip.remove();
+                            handle.classList.remove('drag');
+                            openMenuAt(handle, d, p.m);
+                            return;
+                        }
                         changed();
                     };
-                    window.addEventListener('pointermove', onMove);
+                    window.addEventListener('pointermove', onMoveTracked);
                     window.addEventListener('pointerup', onUp);
-                    onMove(ev);
                 }
                 function handleKey(ev, d, p) {
                     const step = ev.shiftKey ? 60 : STEP;
@@ -596,7 +716,24 @@
                     } else if (ev.key === 'ArrowRight' || ev.key === 'ArrowUp') {
                         move(d, p, p.m + step);
                     } else if (ev.key === 'Delete' || ev.key === 'Backspace') {
-                        removePoint(p);
+                        // same question as in the menu
+                        ev.preventDefault();
+                        openMenuAt(ev.target, d, p.m);
+                        const del = menu && menu.querySelector('button.danger');
+                        if (del) {
+                            del.click();
+                        }
+                        return;
+                    } else if (ev.key === 'Enter' || ev.key === ' ') {
+                        ev.preventDefault();
+                        openMenuAt(ev.target, d, p.m);
+                        return;
+                    } else if (ev.key === 'Insert' || ev.key === '+') {
+                        ev.preventDefault();
+                        const bl = blocksOf(d).find(x => x.a === p.m);
+                        if (bl) {
+                            insertAt(d, bl.a + snap((bl.b - bl.a) / 2));
+                        }
                         return;
                     } else {
                         return;
@@ -604,6 +741,72 @@
                     ev.preventDefault();
                     ev.target.dataset.key = `h${p.m}`;
                     changed();
+                }
+                /** Preview line with the time where a click would add a switching time */
+                function preview(ev, track, d) {
+                    let line = track.querySelector('.preview');
+                    const onBlock = ev && ev.target && ev.target.classList.contains('block');
+                    if (!onBlock || menu) {
+                        if (line) {
+                            line.remove();
+                        }
+                        return;
+                    }
+                    const m = minuteAt(track, ev.clientX, d);
+                    if (points.some(p => p.m === m)) {
+                        if (line) {
+                            line.remove();
+                        }
+                        return;
+                    }
+                    if (!line) {
+                        line = document.createElement('div');
+                        line.className = 'preview';
+                        line.appendChild(document.createElement('span'));
+                        track.appendChild(line);
+                    }
+                    line.style.left = `${((m - d * DAY) / DAY) * 100}%`;
+                    line.firstChild.textContent = `+ ${hhmm(m)}`;
+                }
+                /** Click into a block: new switching time there; keyboard "click" (Enter) opens the choice */
+                function clickBlock(ev, btn, track, d, bl) {
+                    if (ev.detail === 0) {
+                        openMenuAt(btn, d, bl.a);
+                        return;
+                    }
+                    const m = minuteAt(track, ev.clientX, d);
+                    if (m <= bl.a || m >= bl.b || points.some(p => p.m === m)) {
+                        openMenuAt(btn, d, bl.a);
+                        return;
+                    }
+                    insertAt(d, m);
+                }
+                function blockKey(ev, btn, d, bl) {
+                    if (ev.key === 'Insert' || ev.key === '+') {
+                        ev.preventDefault();
+                        insertAt(d, bl.a + snap((bl.b - bl.a) / 2));
+                    }
+                }
+                /** "+ switching time": in the middle of the longest block of the day */
+                function addToDay(d) {
+                    const bl = blocksOf(d).sort((x, y) => y.b - y.a - (x.b - x.a))[0];
+                    insertAt(d, bl.a + snap((bl.b - bl.a) / 2));
+                }
+                /** New switching time: the period that follows is preselected, the choice opens at once */
+                function insertAt(d, m) {
+                    if (points.some(p => p.m === m) || !checkRoom(1)) {
+                        return;
+                    }
+                    const types = info.types.map(t => t.type);
+                    const cur = typeAt(m) || types[0];
+                    points.push({ m, type: types[(types.indexOf(cur) + 1) % types.length] });
+                    sorted();
+                    changed();
+                    const h = $('grid').querySelector(`[data-key="h${m}"]`);
+                    if (h) {
+                        h.focus();
+                        openMenuAt(h, d, m);
+                    }
                 }
                 function removePoint(p) {
                     if (points.length <= 1) {
@@ -626,23 +829,6 @@
                     normalise();
                     changed();
                 }
-                function split(d, bl, m) {
-                    if (m <= bl.a || m >= bl.b || !checkRoom(1)) {
-                        return;
-                    }
-                    const types = info.types.map(t => t.type);
-                    const cur = bl.type || types[0];
-                    const next = types[(types.indexOf(cur) + 1) % types.length];
-                    const p = { m, type: next };
-                    points.push(p);
-                    sorted();
-                    changed();
-                    const btn = $('grid').querySelector(`[data-key="b${d}-${m}"]`);
-                    if (btn) {
-                        btn.focus();
-                        openMenu(btn, d, { a: m, b: bl.b, type: next });
-                    }
-                }
                 function pasteDay(d) {
                     if (!clip) {
                         return;
@@ -650,7 +836,7 @@
                     const keep = points.filter(p => p.m < d * DAY || p.m >= (d + 1) * DAY);
                     const add = [{ m: d * DAY, type: clip.start }, ...clip.pts.map(p => ({ m: d * DAY + p.m, type: p.type }))].filter(p => p.type);
                     if (keep.length + add.length > info.max) {
-                        status(`${info.max} ${info.texts['Switching points']} max.`, true);
+                        status(`${info.max} ${info.texts['Switching times']} max.`, true);
                         return;
                     }
                     points = [...keep, ...add];
@@ -659,7 +845,7 @@
                 }
                 function checkRoom(n) {
                     if (points.length + n > info.max) {
-                        status(`${info.max} ${info.texts['Switching points']} max.`, true);
+                        status(`${info.max} ${info.texts['Switching times']} max.`, true);
                         return false;
                     }
                     return true;
@@ -672,58 +858,111 @@
                         menu = null;
                     }
                 }
-                function openMenu(anchor, d, bl) {
+                /**
+                 * Menu of the block from minute m on: on top "new switching time" (split), then the periods with
+                 * their temperatures, at the bottom "Delete" (with a question first).
+                 *
+                 * @param {HTMLElement} anchor Element the menu belongs to
+                 * @param {number} d Day
+                 * @param {number} m Start of the block (a switching time or the start of the day)
+                 * @param {number} [at] Where to split (right click); default the middle of the block
+                 */
+                function openMenuAt(anchor, d, m, at) {
                     closeMenu();
-                    const m = document.createElement('div');
-                    m.className = 'menu';
-                    m.setAttribute('role', 'menu');
-                    const item = (html, fn) => {
+                    const bl = blocksOf(d).find(x => x.a === m) || { a: m, b: m + STEP, type: typeAt(m) };
+                    const menuEl = document.createElement('div');
+                    menuEl.className = 'menu';
+                    menuEl.setAttribute('role', 'menu');
+                    const item = (html, fn, cls) => {
                         const b = document.createElement('button');
                         b.setAttribute('role', 'menuitem');
                         b.innerHTML = html;
-                        b.addEventListener('click', () => {
-                            closeMenu();
-                            fn();
-                        });
-                        m.appendChild(b);
+                        if (cls) {
+                            b.className = cls;
+                        }
+                        b.addEventListener('click', fn);
+                        menuEl.appendChild(b);
                         return b;
                     };
+                    let splitAt = at !== undefined && at > bl.a && at < bl.b ? at : bl.a + snap((bl.b - bl.a) / 2);
+                    if (points.some(p => p.m === splitAt)) {
+                        splitAt = -1;
+                    }
+                    if (splitAt > bl.a && splitAt < bl.b) {
+                        const b = item(ICON_SPLIT, () => {
+                            closeMenu();
+                            insertAt(d, splitAt);
+                        });
+                        b.appendChild(document.createTextNode(info.texts['New switching time at {time}'].replace('{time}', hhmm(splitAt))));
+                        menuEl.appendChild(document.createElement('hr'));
+                    }
                     let first = null;
                     for (const { type } of info.types) {
-                        const b = item(`<span class="swatch" style="background:var(--c-${type})"></span>`, () => setType(d, bl, type));
+                        const b = item(`<span class="swatch" style="background:var(--c-${type})"></span>`, () => {
+                            closeMenu();
+                            setType(d, bl, type);
+                        });
                         b.appendChild(document.createTextNode(blockText(type) + (type === bl.type ? '  ✓' : '')));
-                        first = first || b;
+                        if (type === bl.type || !first) {
+                            first = b;
+                        }
                     }
-                    m.appendChild(document.createElement('hr'));
-                    const mid = bl.a + snap((bl.b - bl.a) / 2);
-                    if (mid > bl.a && mid < bl.b) {
-                        item(`${info.texts['Split here']} (${hhmm(mid)})`, () => split(d, bl, mid));
+                    const point = points.find(p => p.m === m);
+                    if (point && points.length > 1) {
+                        menuEl.appendChild(document.createElement('hr'));
+                        const del = item(
+                            ICON_DELETE,
+                            () => {
+                                // ask first, inside the menu
+                                menuEl.innerHTML = '';
+                                const qEl = document.createElement('div');
+                                qEl.className = 'question';
+                                qEl.textContent = info.texts['Delete question'].replace('{time}', `${dayName(d, 'short')} ${hhmm(point.m)}`);
+                                const row = document.createElement('div');
+                                row.className = 'row';
+                                const yes = document.createElement('button');
+                                yes.className = 'danger';
+                                yes.innerHTML = ICON_DELETE;
+                                yes.appendChild(document.createTextNode(info.texts.Delete));
+                                yes.addEventListener('click', () => {
+                                    closeMenu();
+                                    removePoint(point);
+                                });
+                                const no = document.createElement('button');
+                                no.textContent = info.texts.Cancel;
+                                no.addEventListener('click', () => {
+                                    closeMenu();
+                                    anchor.focus();
+                                });
+                                row.append(no, yes);
+                                menuEl.append(qEl, row);
+                                no.focus();
+                            },
+                            'danger',
+                        );
+                        del.appendChild(document.createTextNode(info.texts.Delete));
                     }
-                    const at = points.find(p => p.m === bl.a);
-                    if (at && points.length > 1) {
-                        item(`${info.texts['Remove switching point']} (${hhmm(at.m)})`, () => removePoint(at));
-                    }
-                    m.addEventListener('keydown', ev => {
-                        const items = [...m.querySelectorAll('button')];
+                    menuEl.addEventListener('keydown', ev => {
+                        const items = [...menuEl.querySelectorAll('button')];
                         const i = items.indexOf(document.activeElement);
                         if (ev.key === 'Escape') {
                             closeMenu();
                             anchor.focus();
-                        } else if (ev.key === 'ArrowDown') {
+                        } else if (ev.key === 'ArrowDown' || ev.key === 'ArrowRight') {
                             items[(i + 1) % items.length].focus();
-                        } else if (ev.key === 'ArrowUp') {
+                        } else if (ev.key === 'ArrowUp' || ev.key === 'ArrowLeft') {
                             items[(i - 1 + items.length) % items.length].focus();
                         } else {
                             return;
                         }
                         ev.preventDefault();
                     });
-                    document.body.appendChild(m);
+                    document.body.appendChild(menuEl);
                     const r = anchor.getBoundingClientRect();
-                    const top = Math.min(r.bottom + 4 + window.scrollY, document.documentElement.scrollHeight - m.offsetHeight - 4);
-                    m.style.top = `${Math.max(0, top)}px`;
-                    m.style.left = `${Math.min(Math.max(r.left, 4), window.innerWidth - m.offsetWidth - 8)}px`;
-                    menu = m;
+                    const top = Math.min(r.bottom + 4 + window.scrollY, document.documentElement.scrollHeight - menuEl.offsetHeight - 4);
+                    menuEl.style.top = `${Math.max(0, top)}px`;
+                    menuEl.style.left = `${Math.min(Math.max(r.left - 10, 4), window.innerWidth - menuEl.offsetWidth - 8)}px`;
+                    menu = menuEl;
                     first.focus();
                 }
                 document.addEventListener('pointerdown', ev => {
@@ -735,6 +974,15 @@
                 // ---------- start ----------
                 async function start() {
                     applyTheme();
+                    // the admin draws the default iframe border (its style object drops border settings); the page
+                    // is same-origin and removes it itself
+                    try {
+                        if (window.frameElement) {
+                            window.frameElement.style.border = 'none';
+                        }
+                    } catch {
+                        // not embedded
+                    }
                     const base = location.pathname.replace(/\/adapter\/.*$/, '');
                     socket = io.connect('/', { path: `${base}/socket.io` });
                     socket.on('connect', async () => {
@@ -747,9 +995,10 @@
                                 return { m: di[e.day] * DAY + h * 60 + mi, type: e.type };
                             });
                             sorted();
+                            $('hint').textContent = info.texts['Grid hint'];
                             legend();
                             render();
-                            status(`${points.length} / ${info.max} ${info.texts['Switching points']}`);
+                            status(`${points.length} / ${info.max} ${info.texts['Switching times']}`);
                         } catch (err) {
                             status(err.message, true);
                         }

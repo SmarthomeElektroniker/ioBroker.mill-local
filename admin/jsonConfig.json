@@ -19,15 +19,6 @@
                     "lg": 12,
                     "xl": 12
                 },
-                "tDevices": {
-                    "type": "staticText",
-                    "text": "textDevices",
-                    "xs": 12,
-                    "sm": 12,
-                    "md": 12,
-                    "lg": 12,
-                    "xl": 12
-                },
                 "devices": {
                     "type": "table",
                     "label": "labelDevices",
@@ -169,7 +160,6 @@
                 "pollInterval": {
                     "type": "number",
                     "label": "labelPollInterval",
-                    "help": "helpPollInterval",
                     "min": 10,
                     "max": 3600,
                     "default": 30,
@@ -187,7 +177,6 @@
                 "slowInterval": {
                     "type": "number",
                     "label": "labelSlowInterval",
-                    "help": "helpSlowInterval",
                     "min": 60,
                     "max": 86400,
                     "default": 600,
@@ -204,7 +193,6 @@
                 "timeout": {
                     "type": "number",
                     "label": "labelTimeout",
-                    "help": "helpTimeout",
                     "min": 1,
                     "max": 30,
                     "default": 5,
@@ -247,7 +235,6 @@
                 "allowControl": {
                     "type": "checkbox",
                     "label": "labelAllowControl",
-                    "help": "helpAllowControl",
                     "newLine": true,
                     "default": true,
                     "xs": 12,
@@ -290,7 +277,6 @@
                 "apiKey": {
                     "type": "password",
                     "label": "labelApiKey",
-                    "help": "helpApiKey",
                     "newLine": true,
                     "xs": 12,
                     "sm": 12,
