@@ -210,6 +210,12 @@ describe('week grid (admin/weekly.html) in a browser', function () {
         assert.strictEqual(m[0].items.length, 6, 'only the types');
         assert.ok(!m[0].danger && !m[0].svg, 'no split, no delete in the choice');
         assert.ok(m[0].items.some(t => t.startsWith('Comfort (22')));
+        // every type shows its colour
+        assert.ok(
+            await page.evaluate(
+                "[...document.querySelectorAll('.menu .swatch')].every(s => s.getBoundingClientRect().width >= 10)",
+            ),
+        );
     });
 
     it('choosing a type takes it and closes the choice', async () => {
