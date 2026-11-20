@@ -60,6 +60,7 @@
             }
             html,
             body {
+                overflow: hidden;
                 margin: 0;
                 padding: 0;
                 background: transparent;
@@ -959,8 +960,13 @@
                     });
                     document.body.appendChild(menuEl);
                     const r = anchor.getBoundingClientRect();
-                    const top = Math.min(r.bottom + 4 + window.scrollY, document.documentElement.scrollHeight - menuEl.offsetHeight - 4);
-                    menuEl.style.top = `${Math.max(0, top)}px`;
+                    // below the element if it fits, otherwise above it, never outside the page (no scrolling)
+                    let top = r.bottom + 4;
+                    if (top + menuEl.offsetHeight > window.innerHeight - 4) {
+                        top = r.top - menuEl.offsetHeight - 4;
+                    }
+                    top = Math.min(Math.max(4, top), Math.max(4, window.innerHeight - menuEl.offsetHeight - 4));
+                    menuEl.style.top = `${top}px`;
                     menuEl.style.left = `${Math.min(Math.max(r.left - 10, 4), window.innerWidth - menuEl.offsetWidth - 8)}px`;
                     menu = menuEl;
                     first.focus();
